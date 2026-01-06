@@ -121,7 +121,7 @@
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    window.location.href = 'admin.html';
+                    window.location.href = 'tutorial.html';
                 } else {
                     alert(data.msg || "Erro ao logar.");
                 }
@@ -197,4 +197,5 @@
         }
     </script>
 </body>
+
 </html>
