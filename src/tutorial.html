@@ -7,9 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
-        // Segurança
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
+
+        // FUNÇÃO DE FINALIZAÇÃO
+        function finishTutorial() {
+            localStorage.setItem('tutorialSeen', 'true');
+            window.location.href = 'admin.html';
+        }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -22,59 +27,46 @@
         <div class="flex items-center gap-2 font-bold text-xl text-blue-600">
             <i class="fa-solid fa-bicycle"></i> Diet & Ride
         </div>
-        <a href="admin.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-            Ir para o Painel <i class="fa-solid fa-arrow-right ml-2"></i>
-        </a>
+        <button onclick="finishTutorial()" class="text-sm font-bold text-slate-500 hover:text-blue-600">
+            Pular Tutorial
+        </button>
     </nav>
 
     <header class="max-w-4xl mx-auto px-6 py-12 text-center">
         <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Bem-vindo ao seu Gerenciador</h1>
-        <p class="text-lg text-slate-500 leading-relaxed">
-            Aprenda como utilizar a Inteligência Artificial para gerar dietas completas e gerenciar seu app em minutos.
-        </p>
+        <p class="text-lg text-slate-500">Aprenda a usar a IA para criar dietas em minutos.</p>
     </header>
 
-    <main class="max-w-4xl mx-auto px-6 pb-20 space-y-12">
-        
-        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0">1</div>
+    <main class="max-w-4xl mx-auto px-6 pb-20 space-y-8">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">1</div>
             <div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Gere o Plano com IA</h3>
-                <p class="text-slate-600 mb-4">No painel, use o novo <strong>Gerador de Prompts</strong>. Descreva o perfil do aluno (ex: "Homem, 90kg, objetivo hipertrofia"). O sistema criará um texto pronto.</p>
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs font-mono text-slate-500">
-                    Copie o prompt -> Cole no ChatGPT -> Copie o JSON de resposta.
-                </div>
+                <h3 class="font-bold text-slate-800">Gerador de Prompts</h3>
+                <p class="text-sm text-slate-600">No painel, use o botão "Gerador de Prompts". Descreva o aluno e copie o texto gerado.</p>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0">2</div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
+            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">2</div>
             <div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Importe o JSON</h3>
-                <p class="text-slate-600 mb-4">Volte ao painel e clique em <strong>Importar (Colar)</strong>. Cole o código que a IA gerou. O sistema criará automaticamente:</p>
-                <ul class="list-disc list-inside text-sm text-slate-500 space-y-1">
-                    <li>Todas as receitas detalhadas.</li>
-                    <li>O calendário de 4 semanas.</li>
-                    <li>A lista de compras calculada.</li>
-                </ul>
+                <h3 class="font-bold text-slate-800">Use a IA e Importe</h3>
+                <p class="text-sm text-slate-600">Cole o prompt no ChatGPT. Copie o código JSON que ele responder e use o botão "Importar (Colar)" no painel.</p>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 items-start">
-            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0">3</div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
+            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">3</div>
             <div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Publique para o App</h3>
-                <p class="text-slate-600 mb-4">Revise o plano no calendário. Quando estiver pronto, clique em <strong>Publicar no App</strong>. O aluno verá as atualizações instantaneamente no celular dele.</p>
+                <h3 class="font-bold text-slate-800">Publique</h3>
+                <p class="text-sm text-slate-600">Revise o plano e clique em "Publicar no App" para atualizar o aplicativo do aluno.</p>
             </div>
         </div>
 
-        <div class="text-center pt-8">
-            <a href="admin.html" class="inline-block bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                Começar Agora
-            </a>
+        <div class="text-center pt-4">
+            <button onclick="finishTutorial()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg">
+                Entendi, ir para o Painel
+            </button>
         </div>
-
     </main>
-
 </body>
 </html>
