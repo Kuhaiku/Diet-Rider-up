@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Diet Admin | Gestor v31 (Menu Fix)</title>
+    <title>Diet Admin | Gestor v32 (Menu Fix)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <script>
-        // --- 1. SEGURANÇA (Roda antes de tudo) ---
+        // --- 1. FUNÇÕES VITAIS (Carregam primeiro) ---
         const API_URL = '/auth'; 
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
@@ -17,6 +17,20 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = 'login.html';
+        }
+
+        // Movido para o topo para evitar "ReferenceError"
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('mobile-overlay');
+            // Verifica se as classes existem antes de trocar
+            if (sb.classList.contains('-translate-x-full')) {
+                sb.classList.remove('-translate-x-full');
+                ov.classList.remove('hidden');
+            } else {
+                sb.classList.add('-translate-x-full');
+                ov.classList.add('hidden');
+            }
         }
     </script>
 
@@ -141,35 +155,15 @@
     <div id="picker-modal" class="fixed inset-0 bg-slate-900/40 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="p-4 bg-slate-800 text-white flex justify-between items-center border-b border-slate-700"><h3 class="font-bold text-sm">Atribuir Receita</h3><button onclick="closePicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div><div class="p-3 bg-slate-50 border-b border-slate-200"><input type="text" id="picker-search" placeholder="Buscar..." class="w-full text-sm pl-4 py-2 rounded-lg border" onkeyup="renderPickerList()"></div><div id="picker-list" class="max-h-80 overflow-y-auto p-2 bg-white"></div></div></div>
 
     <script>
-        // --- 2. LOGICA DO SISTEMA ---
+        // --- 2. LÓGICA DE DADOS (Carrega depois do HTML estar pronto) ---
         
-        // Mobile Sidebar Function (FIXED)
-        function toggleSidebar() { 
-            const sb = document.getElementById('sidebar'); 
-            const ov = document.getElementById('mobile-overlay'); 
-            if(sb.classList.contains('-translate-x-full')) { 
-                sb.classList.remove('-translate-x-full'); 
-                ov.classList.remove('hidden'); 
-            } else { 
-                sb.classList.add('-translate-x-full'); 
-                ov.classList.add('hidden'); 
-            } 
-        }
-
-        // Show User Name
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if(storedUser && storedUser.name) {
             document.getElementById('user-display').innerText = storedUser.name;
         }
 
-        const MASTER_PROMPT_TEXT = `Atue como Nutricionista Sênior. Objetivo: Gerar um JSON válido com um plano mensal (4 semanas).
-PERFIL: [INSIRA PERFIL AQUI]
-REGRAS: 1. "ingredients": Use a Quantidade DIÁRIA ("q_daily") para 1 dia. O app multiplicará por 7.
-2. Categorias: "cafe", "almoco", "lanche", "jantar". 3. Mercado: "carnes", "horti", "mercearia", "outros".
-ESTRUTURA JSON (Responda APENAS ISSO): { "library": [{ "id": "rec_01", "name": "Nome", "cat": "almoco", "icon": "fa-drumstick-bite", "ingredients": [{"n": "Item", "q_daily": 0.2, "u": "kg", "cat": "carnes"}], "steps": ["Passo 1"] }], "planner": { "1": { "cafe": "rec_01" ... } }, "themes": { "1": "Nome..." } }`;
-        const RECIPE_ONLY_PROMPT_TEXT = `Atue como Nutricionista. Gere um JSON Array com [QTD] receitas para [TIPO].
-REGRAS: Quantidades DIÁRIAS (q_daily). Categorias: "cafe", "almoco", "lanche", "jantar".
-ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot", "ingredients": [{"n": "Item", "q_daily": 2, "u": "un", "cat": "mercearia"}], "steps": ["Passo 1"] }]`;
+        const MASTER_PROMPT_TEXT = `Atue como Nutricionista Sênior. Objetivo: Gerar um JSON válido com um plano mensal (4 semanas). PERFIL: [INSIRA PERFIL AQUI] REGRAS: 1. "ingredients": Use a Quantidade DIÁRIA ("q_daily") para 1 dia. 2. Categorias: "cafe", "almoco", "lanche", "jantar". 3. Mercado: "carnes", "horti", "mercearia", "outros". ESTRUTURA JSON (Responda APENAS ISSO): { "library": [{ "id": "rec_01", "name": "Nome", "cat": "almoco", "icon": "fa-drumstick-bite", "ingredients": [{"n": "Item", "q_daily": 0.2, "u": "kg", "cat": "carnes"}], "steps": ["Passo 1"] }], "planner": { "1": { "cafe": "rec_01" ... } }, "themes": { "1": "Nome..." } }`;
+        const RECIPE_ONLY_PROMPT_TEXT = `Atue como Nutricionista. Gere um JSON Array com [QTD] receitas para [TIPO]. REGRAS: Quantidades DIÁRIAS (q_daily). Categorias: "cafe", "almoco", "lanche", "jantar". ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot", "ingredients": [{"n": "Item", "q_daily": 2, "u": "un", "cat": "mercearia"}], "steps": ["Passo 1"] }]`;
 
         let library = JSON.parse(localStorage.getItem('adminLibrary')) || [];
         let planner = JSON.parse(localStorage.getItem('adminPlanner')) || { 1: {}, 2: {}, 3: {}, 4: {} };
@@ -180,7 +174,6 @@ ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot
 
         window.onload = function() { renderLibrary(); renderPlanner(); loadThemes(); renderPresets(); switchView('presets'); };
 
-        // --- IMPORT LOGIC (SMART) ---
         function openImportModal(type) {
             currentImportType = type;
             document.getElementById('import-title').innerText = type === 'plan' ? 'Importar Plano (JSON)' : 'Importar Receitas (JSON)';
@@ -193,28 +186,18 @@ ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot
         function processImport() {
             let text = document.getElementById('import-text').value.trim();
             if(!text) return alert("Cole o JSON ou carregue um arquivo.");
-
             if (!text.startsWith('{') && !text.startsWith('[')) {
-                const firstBrace = text.indexOf('{');
-                const firstBracket = text.indexOf('[');
-                let startIdx = -1;
-                if (firstBrace !== -1 && firstBracket !== -1) startIdx = Math.min(firstBrace, firstBracket);
-                else if (firstBrace !== -1) startIdx = firstBrace;
-                else if (firstBracket !== -1) startIdx = firstBracket;
-
+                const startIdx = text.search(/[\{\[]/);
                 if (startIdx !== -1) {
                     text = text.substring(startIdx);
-                    const lastBrace = text.lastIndexOf('}');
-                    const lastBracket = text.lastIndexOf(']');
-                    let endIdx = Math.max(lastBrace, lastBracket);
-                    if (endIdx !== -1) text = text.substring(0, endIdx + 1);
+                    const lastIdx = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']'));
+                    if (lastIdx !== -1) text = text.substring(0, lastIdx + 1);
                 }
             }
             if (text.startsWith('"library"')) text = '{' + text + '}';
 
             try {
                 const data = JSON.parse(text);
-                
                 if (currentImportType === 'plan') {
                     let newPlan = {};
                     if (data.library && data.planner) { 
@@ -226,32 +209,18 @@ ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot
                         let name = prompt("Nome do Plano:", "Backup Restaurado"); if(!name) return;
                         newPlan = data; newPlan.id = 'plan_'+Date.now(); newPlan.name = name;
                     } else { throw new Error("JSON Inválido para Plano."); }
-                    
-                    savedPlans.push(newPlan);
-                    localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans));
-                    renderPresets(); renderLibrary();
-                    alert("Plano importado com sucesso!");
-
+                    savedPlans.push(newPlan); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans));
+                    renderPresets(); renderLibrary(); alert("Plano importado com sucesso!");
                 } else {
                     let list = Array.isArray(data) ? data : (data.library || []);
                     if(!list.length) throw new Error("Nenhuma receita encontrada.");
-                    let count = 0;
-                    list.forEach(n => {
-                        const i = library.findIndex(x => x.id === n.id);
-                        if(i >= 0) library[i] = n; else { library.push(n); count++; }
-                    });
-                    localStorage.setItem('adminLibrary', JSON.stringify(library));
-                    renderLibrary();
-                    alert(`${count} receitas importadas!`);
+                    let count = 0; list.forEach(n => { const i = library.findIndex(x => x.id === n.id); if(i >= 0) library[i] = n; else { library.push(n); count++; } });
+                    localStorage.setItem('adminLibrary', JSON.stringify(library)); renderLibrary(); alert(`${count} receitas importadas!`);
                 }
                 closeImportModal();
-
-            } catch(e) {
-                alert("Erro ao processar JSON. Verifique se o texto copiado está correto.\n\nDetalhe: " + e.message);
-            }
+            } catch(e) { alert("Erro ao processar JSON: " + e.message); }
         }
 
-        // --- PREVIEW ---
         function openPreview(id) {
             const plan = savedPlans.find(p => p.id === id); if(!plan) return;
             document.getElementById('preview-title').innerText = plan.name;
@@ -260,10 +229,7 @@ ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot
                 const weekPlan = plan.data.planner[w] || {};
                 const weekTheme = (plan.data.themes && plan.data.themes[w]) ? plan.data.themes[w] : `Semana ${w}`;
                 let mealsHtml = '';
-                ['cafe', 'almoco', 'lanche', 'jantar'].forEach(s => {
-                    const rid = weekPlan[s]; const r = plan.data.library.find(x => x.id === rid);
-                    if(r) mealsHtml += `<span class="inline-block bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600 mr-1 mb-1"><i class="fa-solid ${r.icon} text-slate-400 mr-1"></i>${r.name}</span>`;
-                });
+                ['cafe', 'almoco', 'lanche', 'jantar'].forEach(s => { const rid = weekPlan[s]; const r = plan.data.library.find(x => x.id === rid); if(r) mealsHtml += `<span class="inline-block bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600 mr-1 mb-1"><i class="fa-solid ${r.icon} text-slate-400 mr-1"></i>${r.name}</span>`; });
                 if(!mealsHtml) mealsHtml = '<span class="text-xs text-slate-300 italic">Sem refeições</span>';
                 content.innerHTML += `<div class="mb-4 last:mb-0"><h4 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">${weekTheme}</h4><div class="flex flex-wrap">${mealsHtml}</div></div>`;
             });
@@ -272,7 +238,6 @@ ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot
         }
         function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
 
-        // --- STANDARD ---
         function saveCurrentAsPreset() { const name = prompt("Nome do plano:"); if(!name) return; const p = { id: 'p_'+Date.now(), name, date: new Date().toLocaleDateString(), data: { library, planner, themes } }; savedPlans.push(p); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans)); renderPresets(); }
         function loadPreset(id) { const p = savedPlans.find(x=>x.id===id); library=JSON.parse(JSON.stringify(p.data.library)); planner=JSON.parse(JSON.stringify(p.data.planner)); themes=JSON.parse(JSON.stringify(p.data.themes)); localStorage.setItem('adminLibrary', JSON.stringify(library)); localStorage.setItem('adminPlanner', JSON.stringify(planner)); localStorage.setItem('adminThemes', JSON.stringify(themes)); renderLibrary(); renderPlanner(); loadThemes(); switchView('planner'); const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); }
         function deletePreset(id) { if(confirm("Excluir?")) { savedPlans=savedPlans.filter(x=>x.id!==id); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans)); renderPresets(); } }
