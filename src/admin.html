@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Diet Admin | Gestor v35</title>
+    <title>Diet Admin | Gestor v36</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -56,7 +56,6 @@
         <div class="px-6 py-4 border-b border-slate-50">
             <p class="text-xs text-slate-400 font-medium mb-1">Logado como:</p>
             <p class="text-sm font-bold text-slate-800 truncate mb-2" id="user-display">Admin</p>
-            
             <a href="tutorial.html" class="flex items-center justify-center w-full px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-md hover:bg-blue-100 transition-colors">
                 <i class="fa-solid fa-circle-question mr-2"></i> Ver Tutorial
             </a>
@@ -152,7 +151,16 @@
         let savedPlans = JSON.parse(localStorage.getItem('dietSavedPlans')) || [];
         let pickerContext = null; let currentImportType = ''; 
 
-        window.onload = function() { renderLibrary(); renderPlanner(); loadThemes(); renderPresets(); switchView('presets'); };
+        window.onload = function() {
+            // VERIFICA SE VEIO DO TUTORIAL (SINAL VIA URL)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'gen') {
+                openPromptGen();
+                window.history.replaceState({}, document.title, "admin.html"); // Limpa URL
+            }
+
+            renderLibrary(); renderPlanner(); loadThemes(); renderPresets(); switchView('presets'); 
+        };
 
         // --- NEW: PROMPT GENERATOR LOGIC ---
         function openPromptGen() { document.getElementById('prompt-modal').classList.remove('hidden'); }
@@ -190,7 +198,6 @@
             } catch(e) { alert("Erro ao processar JSON: " + e.message); }
         }
 
-        // ... Resto das funções (openPreview, saveCurrentAsPreset, etc) mantidas idênticas ao v33 ...
         function openPreview(id) { const plan = savedPlans.find(p => p.id === id); if(!plan) return; document.getElementById('preview-title').innerText = plan.name; const content = document.getElementById('preview-content'); content.innerHTML = ''; [1, 2, 3, 4].forEach(w => { const weekPlan = plan.data.planner[w] || {}; const weekTheme = (plan.data.themes && plan.data.themes[w]) ? plan.data.themes[w] : `Semana ${w}`; let mealsHtml = ''; ['cafe', 'almoco', 'lanche', 'jantar'].forEach(s => { const rid = weekPlan[s]; const r = plan.data.library.find(x => x.id === rid); if(r) mealsHtml += `<span class="inline-block bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600 mr-1 mb-1"><i class="fa-solid ${r.icon} text-slate-400 mr-1"></i>${r.name}</span>`; }); if(!mealsHtml) mealsHtml = '<span class="text-xs text-slate-300 italic">Sem refeições</span>'; content.innerHTML += `<div class="mb-4 last:mb-0"><h4 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">${weekTheme}</h4><div class="flex flex-wrap">${mealsHtml}</div></div>`; }); document.getElementById('preview-confirm-btn').onclick = () => { loadPreset(id); closePreview(); }; document.getElementById('preview-modal').classList.remove('hidden'); }
         function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
         function saveCurrentAsPreset() { const name = prompt("Nome do plano:"); if(!name) return; const p = { id: 'p_'+Date.now(), name, date: new Date().toLocaleDateString(), data: { library, planner, themes } }; savedPlans.push(p); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans)); renderPresets(); }
@@ -203,7 +210,6 @@
         function downloadRecipePrompt() { downloadFile(new Blob([RECIPE_ONLY_PROMPT_TEXT], {type:"text/plain"}), "prompt_pacote_receitas.txt"); }
         function downloadFile(b,n) { const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
         function switchView(v) { ['library','planner','presets'].forEach(x=>document.getElementById(`view-${x}`).classList.add('hidden')); document.getElementById(`view-${v}`).classList.remove('hidden'); document.querySelectorAll('nav button').forEach(b => { if(b.id.startsWith('nav-')) { b.className = b.id===`nav-${v}` ? "flex items-center w-full px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg shadow-sm mb-1 border border-blue-100" : "flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"; const i = b.querySelector('i'); i.classList.remove('text-blue-600','text-slate-400'); i.classList.add(b.id===`nav-${v}`?'text-blue-600':'text-slate-400'); } }); const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); }
-        function renderPresets() { const g = document.getElementById('presets-grid'); g.innerHTML = ''; if(savedPlans.length===0) { document.getElementById('empty-presets').classList.remove('hidden'); return; } document.getElementById('empty-presets').classList.add('hidden'); savedPlans.forEach(p => { g.innerHTML += `<div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg relative group"><h4 class="font-bold text-slate-800 text-lg">${p.name}</h4><p class="text-xs text-slate-400 mb-4">${p.date}</p><div class="flex gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3 mb-4"><span>${p.data.library.length} Rec.</span> • <span>4 Sem.</span></div><div class="flex gap-2"><button onclick="loadPreset('${p.id}')" class="flex-1 bg-slate-800 text-white py-2 rounded text-xs font-bold hover:bg-slate-900 transition-colors">Carregar</button><button onclick="openPreview('${p.id}')" class="px-3 bg-white border border-slate-300 text-slate-600 rounded text-xs font-bold hover:bg-slate-50 transition-colors" title="Ver Prévia"><i class="fa-solid fa-eye"></i></button><button onclick="downloadPreset('${p.id}')" class="px-3 bg-white border border-slate-300 text-slate-600 rounded text-xs font-bold hover:bg-slate-50 transition-colors" title="Exportar"><i class="fa-solid fa-share-nodes"></i></button></div><button onclick="deletePreset('${p.id}')" class="absolute top-5 right-5 text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>`; }); }
         const tplIngRow = `<div class="grid grid-cols-1 md:grid-cols-12 gap-2 ing-row items-center mb-3 md:mb-2 bg-slate-50 md:bg-transparent p-2 md:p-0 rounded"><div class="md:col-span-5"><input type="text" placeholder="Item" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm i-n font-medium"></div><div class="grid grid-cols-3 gap-2 md:col-span-6 md:grid-cols-6"><div class="col-span-1 md:col-span-2"><input type="number" placeholder="0" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-q"></div><div class="col-span-1 md:col-span-2"><input type="text" placeholder="un" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-u"></div><div class="col-span-1 md:col-span-2"><select class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-1 py-2 text-xs i-c"><option value="carnes">Carnes</option><option value="horti">Horti</option><option value="mercearia">Merc.</option><option value="outros">Out.</option></select></div></div><div class="md:col-span-1 text-center"><button onclick="this.closest('.ing-row').remove()" class="text-slate-300 hover:text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`;
         function renderLibrary() { const g=document.getElementById('recipe-grid'); g.innerHTML=''; if(library.length===0){document.getElementById('empty-library').classList.remove('hidden');return;} document.getElementById('empty-library').classList.add('hidden'); library.forEach(r=>{ g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md cursor-pointer relative group" onclick="if(!event.target.closest('button')) openRecipeModal('${r.id}')"><div class="flex justify-between mb-2"><span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid ${r.icon}"></i></span><div class="flex gap-1"><button onclick="downloadRecipe('${r.id}'); event.stopPropagation()" class="text-slate-300 hover:text-blue-500 p-1" title="Compartilhar"><i class="fa-solid fa-share-nodes"></i></button><button onclick="deleteRecipe('${r.id}', event)" class="text-slate-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash"></i></button></div></div><h4 class="font-bold text-slate-800 text-sm mb-1">${r.name}</h4><span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase font-bold">${r.cat}</span></div>`; }); }
         function openRecipeModal(id=null) { document.getElementById('recipe-modal').classList.remove('hidden'); document.getElementById('edit-id').value=id||''; document.getElementById('rec-ingredients').innerHTML=''; document.getElementById('rec-steps').innerHTML=''; if(id){ const r=library.find(x=>x.id===id); document.getElementById('rec-name').value=r.name; document.getElementById('rec-cat').value=r.cat; document.getElementById('rec-icon').value=r.icon; r.ingredients.forEach(i=>{ addRecLine(); const l=document.getElementById('rec-ingredients').lastElementChild; l.querySelector('.i-n').value=i.n; l.querySelector('.i-q').value=i.q_daily||i.q_week; l.querySelector('.i-u').value=i.u; l.querySelector('.i-c').value=i.cat||'mercearia'; }); r.steps.forEach(s=>{ addStepLine(); document.getElementById('rec-steps').lastElementChild.querySelector('textarea').value=s; }); } else { document.getElementById('rec-name').value=''; addRecLine(); addStepLine(); } }
