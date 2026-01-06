@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    # Constrói a imagem baseada no Dockerfile da pasta atual
+    build: .
+    image: diet-ride-v1
+    container_name: diet-ride-container
+    
+    # Reinicia automaticamente se cair ou se o servidor reiniciar
+    restart: always
+    
+    # Mapeia a porta 8080 do seu PC para a porta 80 do container
+    # Você acessará via: http://localhost:8080/app.html
+    ports:
+      - "8080:80"

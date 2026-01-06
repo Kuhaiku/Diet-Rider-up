@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # BACKEND (API)
+  backend:
+    build: ./backend
+    container_name: dietcms-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    # Aqui a mágica acontece: Passamos as variáveis do EasyPanel para o container
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=3000
+    networks:
+      - diet-network
+
+  # FRONTEND (HTML + NGINX)
+  frontend:
+    build: ./src
+    container_name: dietcms-frontend
+    restart: always
+    ports:
+      - "80:80" # EasyPanel vai expor a porta 80 automaticamente
+    depends_on:
+      - backend
+    networks:
+      - diet-network
+
+networks:
+  diet-network:
+    driver: bridge

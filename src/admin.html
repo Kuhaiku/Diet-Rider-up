@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Diet Admin | Gestor Protegido v30</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        // CONFIGURAÇÃO UNIVERSAL E PROTEÇÃO
+        const API_URL = '/auth'; 
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; height: 100dvh; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .fade-in { animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
+        .mobile-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
+        @media (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
+    </style>
+</head>
+<body class="flex overflow-hidden text-slate-800 bg-slate-50">
+
+    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 mobile-overlay z-20 hidden md:hidden transition-opacity"></div>
+
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-sm transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <div class="flex items-center gap-3 text-slate-800 font-bold text-xl tracking-tight">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-blue-200 shadow-lg"><i class="fa-solid fa-layer-group"></i></div>
+                DietCMS
+            </div>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+        
+        <div class="px-6 py-2">
+            <p class="text-xs text-slate-400 font-medium">Logado como:</p>
+            <p class="text-xs font-bold text-blue-600 truncate" id="user-display">Admin</p>
+        </div>
+
+        <nav class="flex-1 p-4 overflow-y-auto space-y-1">
+            <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3 mt-2">GERENCIAMENTO</p>
+            <button onclick="switchView('presets')" id="nav-presets" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-folder-open w-5 text-slate-400"></i> Meus Planos</button>
+            <button onclick="switchView('planner')" id="nav-planner" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-calendar-days w-5 text-slate-400"></i> Planejador Atual</button>
+            <button onclick="switchView('library')" id="nav-library" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-book-open w-5 text-slate-400"></i> Biblioteca (Estoque)</button>
+            
+            <div class="mt-6 pt-6 border-t border-slate-100">
+                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3">MODELOS DE IA</p>
+                <button onclick="downloadMasterPrompt()" class="flex items-center w-full px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors mb-1 border border-indigo-100 shadow-sm"><i class="fa-solid fa-robot w-5"></i> Baixar Prompt Plano</button>
+                <button onclick="downloadRecipePrompt()" class="flex items-center w-full px-4 py-2 text-xs font-bold text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors mb-2 border border-pink-100 shadow-sm"><i class="fa-solid fa-utensils w-5"></i> Baixar Prompt Receitas</button>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <button onclick="exportToApp()" class="flex items-center w-full px-4 py-3 text-sm font-bold text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors mb-2 border border-green-100 shadow-sm"><i class="fa-solid fa-rocket w-5"></i> Publicar no App</button>
+                <a href="app.html" target="_blank" class="flex items-center w-full px-4 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><i class="fa-solid fa-external-link-alt w-5"></i> Ver App Online</a>
+            </div>
+
+            <button onclick="logout()" class="flex items-center w-full px-4 py-3 mt-4 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100">
+                <i class="fa-solid fa-right-from-bracket w-5"></i> Sair
+            </button>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative md:ml-64 transition-all duration-300 h-full">
+        <div class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20 shadow-sm flex-shrink-0">
+            <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-600"></i> DietCMS</span>
+            <button onclick="toggleSidebar()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"><i class="fa-solid fa-bars text-xl"></i></button>
+        </div>
+
+        <div id="view-presets" class="flex-1 flex flex-col h-full fade-in overflow-hidden">
+            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
+                <div><h2 class="text-xl font-bold text-slate-800">Meus Planos</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Gerencie seus planejamentos.</p></div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="openImportModal('plan')" class="flex-1 md:flex-none justify-center bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 cursor-pointer flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"><i class="fa-solid fa-paste text-blue-600"></i> Importar (Colar)</button>
+                    <button onclick="saveCurrentAsPreset()" class="flex-1 md:flex-none justify-center bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-floppy-disk"></i> Salvar</button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-32"><div id="presets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div><div id="empty-presets" class="hidden flex flex-col items-center justify-center h-96 text-slate-400"><i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="font-medium text-center">Nenhum plano salvo.</p></div></div>
+        </div>
+
+        <div id="view-planner" class="hidden flex-1 flex flex-col h-full fade-in overflow-hidden">
+            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
+                <div><h2 class="text-xl font-bold text-slate-800">Planejador Atual</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Editando o calendário ativo.</p></div>
+                <div class="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 self-start md:self-auto"><i class="fa-solid fa-info-circle text-blue-500"></i> Clique nas células vazias</div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8"><div class="overflow-x-auto"><table class="w-full border-collapse min-w-[800px]"><thead><tr class="bg-slate-50 border-b border-slate-200 text-left"><th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase w-24 text-center border-r border-slate-200">Semana</th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-mug-hot mr-2 text-yellow-500"></i>Café</th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-utensils mr-2 text-blue-500"></i>Almoço</th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-bolt mr-2 text-orange-500"></i>Lanche</th><th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-moon mr-2 text-indigo-500"></i>Jantar</th></tr></thead><tbody id="planner-body" class="divide-y divide-slate-100"></tbody></table></div></div>
+                <h3 class="text-sm font-bold text-slate-700 mt-8 mb-4">Temas das Semanas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 1</label><input type="text" id="theme-w1" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 2</label><input type="text" id="theme-w2" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 3</label><input type="text" id="theme-w3" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 4</label><input type="text" id="theme-w4" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-library" class="hidden flex-1 flex flex-col h-full fade-in overflow-hidden">
+            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
+                <div><h2 class="text-xl font-bold text-slate-800">Estoque de Receitas</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Banco de dados de refeições.</p></div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="downloadAllRecipes()" class="flex-none justify-center bg-white border border-slate-300 text-slate-600 px-3 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 shadow-sm whitespace-nowrap" title="Baixar Tudo"><i class="fa-solid fa-download"></i></button>
+                    <button onclick="openImportModal('recipe')" class="flex-1 md:flex-none justify-center bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"><i class="fa-solid fa-paste text-blue-500"></i> Importar (Colar)</button>
+                    <button onclick="openRecipeModal()" class="flex-1 md:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-plus"></i> Nova Receita</button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-32"><div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div><div id="empty-library" class="hidden flex flex-col items-center justify-center h-96 text-slate-400"><i class="fa-solid fa-basket-shopping text-4xl mb-3 text-slate-300"></i><p class="font-medium text-center">Nenhuma receita cadastrada.<br>Importe ou crie manualmente.</p></div></div>
+        </div>
+    </main>
+
+    <div id="import-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-full md:h-auto md:max-h-[80vh] flex flex-col overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div><h3 class="font-bold text-lg text-slate-800" id="import-title">Importar</h3><p class="text-xs text-slate-500">Cole o JSON (O sistema corrige erros).</p></div>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex-1 p-0 overflow-hidden relative">
+                <textarea id="import-text" class="w-full h-full p-4 bg-slate-50 text-xs font-mono resize-none focus:outline-none focus:bg-white transition-colors" placeholder='Cole aqui o resultado da IA...'></textarea>
+                <label class="absolute bottom-4 right-4 bg-white border border-slate-200 text-slate-500 px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-slate-50 cursor-pointer flex items-center gap-2"><i class="fa-solid fa-paperclip"></i> Ou carregar arquivo<input type="file" class="hidden" accept=".json" onchange="loadFileContent(this)"></label>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2">
+                <button onclick="closeImportModal()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button onclick="processImport()" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-lg flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Processar Dados</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-full md:h-auto md:max-h-[80vh] flex flex-col overflow-hidden border border-slate-200"><div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white"><h3 class="font-bold text-lg text-slate-800" id="preview-title">Prévia do Plano</h3><button onclick="closePreview()" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="flex-1 overflow-y-auto p-6 bg-slate-50" id="preview-content"></div><div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2"><button onclick="closePreview()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Fechar</button><button id="preview-confirm-btn" class="px-6 py-2 text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg shadow-lg">Carregar Este Plano</button></div></div></div>
+    <div id="recipe-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm transition-opacity p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden border border-slate-200"><div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white"><h3 class="font-bold text-lg text-slate-800">Editor</h3><button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button></div><div class="flex-1 overflow-y-auto p-4 space-y-6 md:p-8 bg-slate-50"><input type="hidden" id="edit-id"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="grid grid-cols-1 md:grid-cols-12 gap-4"><div class="md:col-span-8"><input type="text" id="rec-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-lg font-bold" placeholder="Nome"></div><div class="grid grid-cols-2 gap-2 md:col-span-4 md:flex md:gap-4"><div class="w-full"><select id="rec-cat" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm"><option value="almoco">Almoço</option><option value="jantar">Jantar</option><option value="cafe">Café</option><option value="lanche">Lanche</option></select></div><div class="w-full"><select id="rec-icon" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm font-mono"><option value="fa-utensils">🍴</option><option value="fa-drumstick-bite">🍗</option><option value="fa-leaf">🥬</option><option value="fa-bowl-rice">🍚</option><option value="fa-mug-hot">☕</option><option value="fa-bolt">⚡</option></select></div></div></div></div><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Ingredientes (Qtd. Diária)</h4><button onclick="addRecLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded">+ Item</button></div><div id="rec-ingredients" class="space-y-2"></div></div><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Passos</h4><button onclick="addStepLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded">+ Passo</button></div><div id="rec-steps" class="space-y-3"></div></div></div><div class="p-4 border-t border-slate-100 bg-white flex justify-between items-center"><button onclick="closeModal()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100">Cancelar</button><button onclick="saveRecipeToLibrary()" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg">Salvar</button></div></div></div>
+    <div id="picker-modal" class="fixed inset-0 bg-slate-900/40 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="p-4 bg-slate-800 text-white flex justify-between items-center border-b border-slate-700"><h3 class="font-bold text-sm">Atribuir Receita</h3><button onclick="closePicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div><div class="p-3 bg-slate-50 border-b border-slate-200"><input type="text" id="picker-search" placeholder="Buscar..." class="w-full text-sm pl-4 py-2 rounded-lg border" onkeyup="renderPickerList()"></div><div id="picker-list" class="max-h-80 overflow-y-auto p-2 bg-white"></div></div></div>
+
+    <script>
+        // SHOW USER NAME
+        const storedUser = JSON.parse(localStorage.getItem('user'));
+        if(storedUser && storedUser.name) {
+            document.getElementById('user-display').innerText = storedUser.name;
+        }
+
+        const MASTER_PROMPT_TEXT = `Atue como Nutricionista Sênior. Objetivo: Gerar um JSON válido com um plano mensal (4 semanas).
+PERFIL: [INSIRA PERFIL AQUI]
+REGRAS: 1. "ingredients": Use a Quantidade DIÁRIA ("q_daily") para 1 dia. O app multiplicará por 7.
+2. Categorias: "cafe", "almoco", "lanche", "jantar". 3. Mercado: "carnes", "horti", "mercearia", "outros".
+ESTRUTURA JSON (Responda APENAS ISSO): { "library": [{ "id": "rec_01", "name": "Nome", "cat": "almoco", "icon": "fa-drumstick-bite", "ingredients": [{"n": "Item", "q_daily": 0.2, "u": "kg", "cat": "carnes"}], "steps": ["Passo 1"] }], "planner": { "1": { "cafe": "rec_01" ... } }, "themes": { "1": "Nome..." } }`;
+        const RECIPE_ONLY_PROMPT_TEXT = `Atue como Nutricionista. Gere um JSON Array com [QTD] receitas para [TIPO].
+REGRAS: Quantidades DIÁRIAS (q_daily). Categorias: "cafe", "almoco", "lanche", "jantar".
+ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot", "ingredients": [{"n": "Item", "q_daily": 2, "u": "un", "cat": "mercearia"}], "steps": ["Passo 1"] }]`;
+
+        let library = JSON.parse(localStorage.getItem('adminLibrary')) || [];
+        let planner = JSON.parse(localStorage.getItem('adminPlanner')) || { 1: {}, 2: {}, 3: {}, 4: {} };
+        let themes = JSON.parse(localStorage.getItem('adminThemes')) || {};
+        let savedPlans = JSON.parse(localStorage.getItem('dietSavedPlans')) || [];
+        let pickerContext = null;
+        let currentImportType = ''; 
+
+        window.onload = function() { renderLibrary(); renderPlanner(); loadThemes(); renderPresets(); switchView('presets'); };
+
+        // --- IMPORT LOGIC (SMART) ---
+        function openImportModal(type) {
+            currentImportType = type;
+            document.getElementById('import-title').innerText = type === 'plan' ? 'Importar Plano (JSON)' : 'Importar Receitas (JSON)';
+            document.getElementById('import-text').value = '';
+            document.getElementById('import-modal').classList.remove('hidden');
+        }
+        function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); }
+        function loadFileContent(input) { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{document.getElementById('import-text').value=e.target.result;}; r.readAsText(f); input.value=''; }
+
+        function processImport() {
+            let text = document.getElementById('import-text').value.trim();
+            if(!text) return alert("Cole o JSON ou carregue um arquivo.");
+
+            if (!text.startsWith('{') && !text.startsWith('[')) {
+                const firstBrace = text.indexOf('{');
+                const firstBracket = text.indexOf('[');
+                let startIdx = -1;
+                if (firstBrace !== -1 && firstBracket !== -1) startIdx = Math.min(firstBrace, firstBracket);
+                else if (firstBrace !== -1) startIdx = firstBrace;
+                else if (firstBracket !== -1) startIdx = firstBracket;
+
+                if (startIdx !== -1) {
+                    text = text.substring(startIdx);
+                    const lastBrace = text.lastIndexOf('}');
+                    const lastBracket = text.lastIndexOf(']');
+                    let endIdx = Math.max(lastBrace, lastBracket);
+                    if (endIdx !== -1) text = text.substring(0, endIdx + 1);
+                }
+            }
+            if (text.startsWith('"library"')) text = '{' + text + '}';
+
+            try {
+                const data = JSON.parse(text);
+                
+                if (currentImportType === 'plan') {
+                    let newPlan = {};
+                    if (data.library && data.planner) { 
+                        let name = prompt("Nome do Plano:", "Plano Importado " + new Date().toLocaleDateString()); if(!name) return;
+                        newPlan = { id: 'plan_ia_'+Date.now(), name: name, date: new Date().toLocaleDateString(), data: { library: data.library, planner: data.planner, themes: data.themes||{} } };
+                        data.library.forEach(r => { if(!library.find(x=>x.id===r.id)) library.push(r); });
+                        localStorage.setItem('adminLibrary', JSON.stringify(library));
+                    } else if (data.data && data.data.library) { 
+                        let name = prompt("Nome do Plano:", "Backup Restaurado"); if(!name) return;
+                        newPlan = data; newPlan.id = 'plan_'+Date.now(); newPlan.name = name;
+                    } else { throw new Error("JSON Inválido para Plano."); }
+                    
+                    savedPlans.push(newPlan);
+                    localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans));
+                    renderPresets(); renderLibrary();
+                    alert("Plano importado com sucesso!");
+
+                } else {
+                    let list = Array.isArray(data) ? data : (data.library || []);
+                    if(!list.length) throw new Error("Nenhuma receita encontrada.");
+                    let count = 0;
+                    list.forEach(n => {
+                        const i = library.findIndex(x => x.id === n.id);
+                        if(i >= 0) library[i] = n; else { library.push(n); count++; }
+                    });
+                    localStorage.setItem('adminLibrary', JSON.stringify(library));
+                    renderLibrary();
+                    alert(`${count} receitas importadas!`);
+                }
+                closeImportModal();
+
+            } catch(e) {
+                alert("Erro ao processar JSON. Verifique se o texto copiado está correto.\n\nDetalhe: " + e.message);
+            }
+        }
+
+        // --- PREVIEW ---
+        function openPreview(id) {
+            const plan = savedPlans.find(p => p.id === id); if(!plan) return;
+            document.getElementById('preview-title').innerText = plan.name;
+            const content = document.getElementById('preview-content'); content.innerHTML = '';
+            [1, 2, 3, 4].forEach(w => {
+                const weekPlan = plan.data.planner[w] || {};
+                const weekTheme = (plan.data.themes && plan.data.themes[w]) ? plan.data.themes[w] : `Semana ${w}`;
+                let mealsHtml = '';
+                ['cafe', 'almoco', 'lanche', 'jantar'].forEach(s => {
+                    const rid = weekPlan[s]; const r = plan.data.library.find(x => x.id === rid);
+                    if(r) mealsHtml += `<span class="inline-block bg-white border border-slate-200 rounded px-2 py-1 text-xs text-slate-600 mr-1 mb-1"><i class="fa-solid ${r.icon} text-slate-400 mr-1"></i>${r.name}</span>`;
+                });
+                if(!mealsHtml) mealsHtml = '<span class="text-xs text-slate-300 italic">Sem refeições</span>';
+                content.innerHTML += `<div class="mb-4 last:mb-0"><h4 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 border-b border-slate-200 pb-1">${weekTheme}</h4><div class="flex flex-wrap">${mealsHtml}</div></div>`;
+            });
+            document.getElementById('preview-confirm-btn').onclick = () => { loadPreset(id); closePreview(); };
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+        function closePreview() { document.getElementById('preview-modal').classList.add('hidden'); }
+
+        // --- STANDARD ---
+        function saveCurrentAsPreset() { const name = prompt("Nome do plano:"); if(!name) return; const p = { id: 'p_'+Date.now(), name, date: new Date().toLocaleDateString(), data: { library, planner, themes } }; savedPlans.push(p); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans)); renderPresets(); }
+        function loadPreset(id) { const p = savedPlans.find(x=>x.id===id); library=JSON.parse(JSON.stringify(p.data.library)); planner=JSON.parse(JSON.stringify(p.data.planner)); themes=JSON.parse(JSON.stringify(p.data.themes)); localStorage.setItem('adminLibrary', JSON.stringify(library)); localStorage.setItem('adminPlanner', JSON.stringify(planner)); localStorage.setItem('adminThemes', JSON.stringify(themes)); renderLibrary(); renderPlanner(); loadThemes(); switchView('planner'); const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); }
+        function deletePreset(id) { if(confirm("Excluir?")) { savedPlans=savedPlans.filter(x=>x.id!==id); localStorage.setItem('dietSavedPlans', JSON.stringify(savedPlans)); renderPresets(); } }
+        function downloadPreset(id) { const preset = savedPlans.find(p => p.id === id); const fileName = `plano_${preset.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`; downloadFile(new Blob([JSON.stringify(preset, null, 2)], { type: "application/json" }), fileName); }
+        function downloadRecipe(id) { const recipe = library.find(r => r.id === id); if(!recipe) return; const fileName = `receita_${recipe.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`; downloadFile(new Blob([JSON.stringify([recipe], null, 2)], { type: "application/json" }), fileName); }
+        function downloadAllRecipes() { downloadFile(new Blob([JSON.stringify(library, null, 2)], { type: "application/json" }), "todas_receitas_estoque.json"); }
+        function downloadMasterPrompt() { downloadFile(new Blob([MASTER_PROMPT_TEXT], {type:"text/plain"}), "prompt_plano_mensal.txt"); }
+        function downloadRecipePrompt() { downloadFile(new Blob([RECIPE_ONLY_PROMPT_TEXT], {type:"text/plain"}), "prompt_pacote_receitas.txt"); }
+        function downloadFile(b,n) { const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
+        
+        function switchView(v) { ['library','planner','presets'].forEach(x=>document.getElementById(`view-${x}`).classList.add('hidden')); document.getElementById(`view-${v}`).classList.remove('hidden'); document.querySelectorAll('nav button').forEach(b => { if(b.id.startsWith('nav-')) { b.className = b.id===`nav-${v}` ? "flex items-center w-full px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg shadow-sm mb-1 border border-blue-100" : "flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"; const i = b.querySelector('i'); i.classList.remove('text-blue-600','text-slate-400'); i.classList.add(b.id===`nav-${v}`?'text-blue-600':'text-slate-400'); } }); const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); }
+        function renderPresets() { const g = document.getElementById('presets-grid'); g.innerHTML = ''; if(savedPlans.length===0) { document.getElementById('empty-presets').classList.remove('hidden'); return; } document.getElementById('empty-presets').classList.add('hidden'); savedPlans.forEach(p => { g.innerHTML += `<div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg relative group"><h4 class="font-bold text-slate-800 text-lg">${p.name}</h4><p class="text-xs text-slate-400 mb-4">${p.date}</p><div class="flex gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3 mb-4"><span>${p.data.library.length} Rec.</span> • <span>4 Sem.</span></div><div class="flex gap-2"><button onclick="loadPreset('${p.id}')" class="flex-1 bg-slate-800 text-white py-2 rounded text-xs font-bold hover:bg-slate-900 transition-colors">Carregar</button><button onclick="openPreview('${p.id}')" class="px-3 bg-white border border-slate-300 text-slate-600 rounded text-xs font-bold hover:bg-slate-50 transition-colors" title="Ver Prévia"><i class="fa-solid fa-eye"></i></button><button onclick="downloadPreset('${p.id}')" class="px-3 bg-white border border-slate-300 text-slate-600 rounded text-xs font-bold hover:bg-slate-50 transition-colors" title="Exportar"><i class="fa-solid fa-share-nodes"></i></button></div><button onclick="deletePreset('${p.id}')" class="absolute top-5 right-5 text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>`; }); }
+        
+        // UI
+        const tplIngRow = `<div class="grid grid-cols-1 md:grid-cols-12 gap-2 ing-row items-center mb-3 md:mb-2 bg-slate-50 md:bg-transparent p-2 md:p-0 rounded"><div class="md:col-span-5"><input type="text" placeholder="Item" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm i-n font-medium"></div><div class="grid grid-cols-3 gap-2 md:col-span-6 md:grid-cols-6"><div class="col-span-1 md:col-span-2"><input type="number" placeholder="0" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-q"></div><div class="col-span-1 md:col-span-2"><input type="text" placeholder="un" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-u"></div><div class="col-span-1 md:col-span-2"><select class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-1 py-2 text-xs i-c"><option value="carnes">Carnes</option><option value="horti">Horti</option><option value="mercearia">Merc.</option><option value="outros">Out.</option></select></div></div><div class="md:col-span-1 text-center"><button onclick="this.closest('.ing-row').remove()" class="text-slate-300 hover:text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`;
+        function renderLibrary() { const g=document.getElementById('recipe-grid'); g.innerHTML=''; if(library.length===0){document.getElementById('empty-library').classList.remove('hidden');return;} document.getElementById('empty-library').classList.add('hidden'); library.forEach(r=>{ g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md cursor-pointer relative group" onclick="if(!event.target.closest('button')) openRecipeModal('${r.id}')"><div class="flex justify-between mb-2"><span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid ${r.icon}"></i></span><div class="flex gap-1"><button onclick="downloadRecipe('${r.id}'); event.stopPropagation()" class="text-slate-300 hover:text-blue-500 p-1" title="Compartilhar"><i class="fa-solid fa-share-nodes"></i></button><button onclick="deleteRecipe('${r.id}', event)" class="text-slate-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash"></i></button></div></div><h4 class="font-bold text-slate-800 text-sm mb-1">${r.name}</h4><span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase font-bold">${r.cat}</span></div>`; }); }
+        function openRecipeModal(id=null) { document.getElementById('recipe-modal').classList.remove('hidden'); document.getElementById('edit-id').value=id||''; document.getElementById('rec-ingredients').innerHTML=''; document.getElementById('rec-steps').innerHTML=''; if(id){ const r=library.find(x=>x.id===id); document.getElementById('rec-name').value=r.name; document.getElementById('rec-cat').value=r.cat; document.getElementById('rec-icon').value=r.icon; r.ingredients.forEach(i=>{ addRecLine(); const l=document.getElementById('rec-ingredients').lastElementChild; l.querySelector('.i-n').value=i.n; l.querySelector('.i-q').value=i.q_daily||i.q_week; l.querySelector('.i-u').value=i.u; l.querySelector('.i-c').value=i.cat||'mercearia'; }); r.steps.forEach(s=>{ addStepLine(); document.getElementById('rec-steps').lastElementChild.querySelector('textarea').value=s; }); } else { document.getElementById('rec-name').value=''; addRecLine(); addStepLine(); } }
+        function closeModal() { document.getElementById('recipe-modal').classList.add('hidden'); }
+        function addRecLine() { document.getElementById('rec-ingredients').insertAdjacentHTML('beforeend', tplIngRow); }
+        function addStepLine() { document.getElementById('rec-steps').insertAdjacentHTML('beforeend', `<div class="flex gap-2 step-row mb-2"><textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm h-16 s-txt" placeholder="Passo..."></textarea><button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>`); }
+        function saveRecipeToLibrary() { const id=document.getElementById('edit-id').value||'rec_'+Date.now(); const name=document.getElementById('rec-name').value; if(!name)return alert("Nome?"); const ings=[]; document.querySelectorAll('.ing-row').forEach(r=>{const n=r.querySelector('.i-n').value; if(n) ings.push({n, q_daily: parseFloat(r.querySelector('.i-q').value)||0, u:r.querySelector('.i-u').value, cat:r.querySelector('.i-c').value});}); const steps=[]; document.querySelectorAll('.s-txt').forEach(t=>{if(t.value)steps.push(t.value);}); const obj={id,name,cat:document.getElementById('rec-cat').value,icon:document.getElementById('rec-icon').value,ingredients:ings,steps}; const i=library.findIndex(x=>x.id===id); if(i>=0) library[i]=obj; else library.push(obj); localStorage.setItem('adminLibrary', JSON.stringify(library)); closeModal(); renderLibrary(); renderPlanner(); }
+        function deleteRecipe(id,e) { e.stopPropagation(); if(confirm("Excluir?")){library=library.filter(x=>x.id!==id); localStorage.setItem('adminLibrary', JSON.stringify(library)); renderLibrary(); renderPlanner();} }
+        function renderPlanner() { const b=document.getElementById('planner-body'); b.innerHTML=''; [1,2,3,4].forEach(w=>{ let h=`<tr class="hover:bg-slate-50 group"><td class="px-6 py-4 text-sm font-bold text-slate-700 text-center border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-0 z-10">Semana ${w}</td>`; ['cafe','almoco','lanche','jantar'].forEach(s=>{ const rid=planner[w][s]; const r=library.find(x=>x.id===rid); h+=`<td class="px-2 py-2 min-w-[140px]">${r?`<div onclick="openPicker(${w},'${s}')" class="bg-white border border-blue-200 p-2 md:p-3 rounded-lg shadow-sm cursor-pointer flex items-center gap-2 md:gap-3 group/card relative h-16"><div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex flex-shrink-0 items-center justify-center text-xs font-bold border border-blue-100"><i class="fa-solid ${r.icon}"></i></div><span class="font-bold text-xs text-slate-700 truncate w-20 md:w-24">${r.name}</span><button onclick="clearSlot(${w},'${s}',event)" class="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] shadow-sm md:opacity-0 group-hover/card:opacity-100"><i class="fa-solid fa-xmark"></i></button></div>`:`<button onclick="openPicker(${w},'${s}')" class="w-full border-2 border-dashed border-slate-200 rounded-lg h-16 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500"><i class="fa-solid fa-plus text-sm mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wide">Add</span></button>`}</td>`; }); b.innerHTML+=h+'</tr>'; }); }
+        function openPicker(w,s) { pickerContext={w,s}; document.getElementById('picker-modal').classList.remove('hidden'); renderPickerList(); document.getElementById('picker-search').focus(); }
+        function closePicker() { document.getElementById('picker-modal').classList.add('hidden'); }
+        function renderPickerList() { const l=document.getElementById('picker-list'); const q=document.getElementById('picker-search').value.toLowerCase(); l.innerHTML=''; library.filter(r=>r.name.toLowerCase().includes(q)).forEach(r=>{ l.innerHTML+=`<div onclick="assignRecipe('${r.id}')" class="p-3 hover:bg-blue-50 cursor-pointer rounded-lg flex items-center gap-3 border border-transparent hover:border-blue-100 mb-1 group"><div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-xs group-hover:bg-white group-hover:text-blue-500"><i class="fa-solid ${r.icon}"></i></div><div><p class="text-sm font-bold text-slate-700 group-hover:text-blue-700">${r.name}</p></div></div>`; }); }
+        function assignRecipe(id) { planner[pickerContext.w][pickerContext.s]=id; localStorage.setItem('adminPlanner', JSON.stringify(planner)); closePicker(); renderPlanner(); }
+        function clearSlot(w,s,e) { e.stopPropagation(); delete planner[w][s]; localStorage.setItem('adminPlanner', JSON.stringify(planner)); renderPlanner(); }
+        function saveThemes() { [1,2,3,4].forEach(w=>themes[w]=document.getElementById(`theme-w${w}`).value); localStorage.setItem('adminThemes', JSON.stringify(themes)); }
+        function loadThemes() { [1,2,3,4].forEach(w=>{if(themes[w])document.getElementById(`theme-w${w}`).value=themes[w];}); }
+        function exportToApp() { let d={}; [1,2,3,4].forEach(w=>{ let m={}, ml=[]; ['cafe','almoco','lanche','jantar'].forEach(s=>{ const rid=planner[w][s]; const r=library.find(x=>x.id===rid); if(r){ m[s]={name:r.name, ingredients:r.ingredients, steps:r.steps}; r.ingredients.forEach(i=>{ let ex=ml.find(x=>x.n.toLowerCase()===i.n.toLowerCase()); if(ex) ex.q_daily+=i.q_daily||i.q_week; else ml.push({...i, id:i.n.replace(/[^a-z0-9]/g,'')+Math.floor(Math.random()*99)}); }); } }); d[w]={headerTitle:`Semana ${w}`, headerSubtitle:themes[w]||"", meals:m, market:ml}; }); localStorage.setItem('dietData', JSON.stringify(d)); alert("Sucesso! App atualizado."); }
+    </script>
+</body>
+</html>
