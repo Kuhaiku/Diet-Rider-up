@@ -25,20 +25,19 @@
         </div>
 
         <div class="p-8">
-            
             <div id="form-login">
                 <h2 class="text-xl font-bold text-slate-800 mb-6">Bem-vindo de volta!</h2>
                 <form onsubmit="handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                        <input type="email" id="log-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" placeholder="seu@email.com" required>
+                        <input type="email" id="log-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
                     </div>
                     <div>
                         <div class="flex justify-between mb-1">
                             <label class="block text-xs font-bold text-slate-500 uppercase">Senha</label>
                             <a href="#" onclick="switchForm('forgot')" class="text-xs text-blue-600 font-bold hover:underline">Esqueceu?</a>
                         </div>
-                        <input type="password" id="log-pass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all" placeholder="••••••••" required>
+                        <input type="password" id="log-pass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all transform active:scale-95">ENTRAR</button>
                 </form>
@@ -48,18 +47,9 @@
             <div id="form-register" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800 mb-6">Criar Conta</h2>
                 <form onsubmit="handleRegister(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome</label>
-                        <input type="text" id="reg-name" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                        <input type="email" id="reg-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Senha</label>
-                        <input type="password" id="reg-pass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
-                    </div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome</label><input type="text" id="reg-name" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none" required></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label><input type="email" id="reg-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none" required></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Senha</label><input type="password" id="reg-pass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none" required></div>
                     <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-green-200 transition-all">CADASTRAR</button>
                 </form>
                 <p class="text-center text-sm text-slate-500 mt-6">Já tem conta? <a href="#" onclick="switchForm('login')" class="text-blue-600 font-bold hover:underline">Entrar</a></p>
@@ -68,36 +58,22 @@
             <div id="form-forgot" class="hidden">
                 <h2 class="text-xl font-bold text-slate-800 mb-2">Recuperar Senha</h2>
                 <p class="text-sm text-slate-500 mb-6">Enviaremos um código para seu email.</p>
-                
                 <form id="step-email" onsubmit="sendCode(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                        <input type="email" id="rec-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:border-blue-500 outline-none" required>
-                    </div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label><input type="email" id="rec-email" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none" required></div>
                     <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg transition-all">ENVIAR CÓDIGO</button>
                 </form>
-
                 <form id="step-reset" onsubmit="resetPass(event)" class="space-y-4 hidden fade-in">
-                    <div class="p-3 bg-blue-50 text-blue-700 text-xs rounded mb-2">Código enviado! Verifique seu email.</div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Código</label>
-                        <input type="text" id="rec-code" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm text-center font-mono tracking-widest font-bold" placeholder="000000" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nova Senha</label>
-                        <input type="password" id="rec-newpass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm" required>
-                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-700 text-xs rounded mb-2">Código enviado!</div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Código</label><input type="text" id="rec-code" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm text-center font-mono tracking-widest font-bold" placeholder="000000" required></div>
+                    <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nova Senha</label><input type="password" id="rec-newpass" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-sm" required></div>
                     <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">ALTERAR SENHA</button>
                 </form>
-
                 <p class="text-center text-sm text-slate-500 mt-6"><a href="#" onclick="switchForm('login')" class="text-slate-400 hover:text-slate-600">Voltar ao Login</a></p>
             </div>
-
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO UNIVERSAL (Funciona local e no EasyPanel via Nginx)
         const API_URL = '/auth';
 
         function switchForm(id) {
@@ -121,7 +97,13 @@
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
-                    window.location.href = 'tutorial.html';
+                    
+                    // --- LÓGICA DO TUTORIAL ---
+                    if (localStorage.getItem('tutorialSeen')) {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'tutorial.html';
+                    }
                 } else {
                     alert(data.msg || "Erro ao logar.");
                 }
@@ -131,9 +113,7 @@
         async function handleRegister(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = "Carregando..."; btn.disabled = true;
-
+            const originalText = btn.innerText; btn.innerText = "Carregando..."; btn.disabled = true;
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-pass').value;
@@ -148,54 +128,13 @@
                 if(res.ok) {
                     alert("Cadastro realizado! Faça login.");
                     switchForm('login');
-                } else {
-                    alert(data.msg);
-                }
+                } else { alert(data.msg); }
             } catch (err) { alert('Erro ao registrar.'); }
             finally { btn.innerText = originalText; btn.disabled = false; }
         }
 
-        async function sendCode(e) {
-            e.preventDefault();
-            const email = document.getElementById('rec-email').value;
-            try {
-                const res = await fetch(`${API_URL}/forgot-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                const data = await res.json();
-                if(res.ok) {
-                    document.getElementById('step-email').classList.add('hidden');
-                    document.getElementById('step-reset').classList.remove('hidden');
-                } else {
-                    alert(data.msg);
-                }
-            } catch(err) { alert("Erro de conexão"); }
-        }
-
-        async function resetPass(e) {
-            e.preventDefault();
-            const email = document.getElementById('rec-email').value;
-            const code = document.getElementById('rec-code').value;
-            const newPassword = document.getElementById('rec-newpass').value;
-
-            try {
-                const res = await fetch(`${API_URL}/reset-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, code, newPassword })
-                });
-                const data = await res.json();
-                if(res.ok) {
-                    alert("Senha alterada! Faça login.");
-                    switchForm('login');
-                } else {
-                    alert(data.msg);
-                }
-            } catch(err) { alert("Erro ao resetar"); }
-        }
+        async function sendCode(e) { /* Lógica de envio mantida */ e.preventDefault(); const email = document.getElementById('rec-email').value; try { const res = await fetch(`${API_URL}/forgot-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }); const data = await res.json(); if(res.ok) { document.getElementById('step-email').classList.add('hidden'); document.getElementById('step-reset').classList.remove('hidden'); } else { alert(data.msg); } } catch(err) { alert("Erro de conexão"); } }
+        async function resetPass(e) { /* Lógica de reset mantida */ e.preventDefault(); const email = document.getElementById('rec-email').value; const code = document.getElementById('rec-code').value; const newPassword = document.getElementById('rec-newpass').value; try { const res = await fetch(`${API_URL}/reset-password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code, newPassword }) }); const data = await res.json(); if(res.ok) { alert("Senha alterada! Faça login."); switchForm('login'); } else { alert(data.msg); } } catch(err) { alert("Erro ao resetar"); } }
     </script>
 </body>
-
 </html>
