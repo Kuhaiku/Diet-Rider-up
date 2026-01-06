@@ -10,10 +10,11 @@
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
 
-        // FUNÇÃO DE FINALIZAÇÃO
+        // FUNÇÃO DE FINALIZAÇÃO (Agora leva direto pro Gerador)
         function finishTutorial() {
             localStorage.setItem('tutorialSeen', 'true');
-            window.location.href = 'admin.html';
+            // O parâmetro ?action=gen avisa o admin para abrir o modal
+            window.location.href = 'admin.html?action=gen';
         }
     </script>
     <style>
@@ -27,9 +28,9 @@
         <div class="flex items-center gap-2 font-bold text-xl text-blue-600">
             <i class="fa-solid fa-bicycle"></i> Diet & Ride
         </div>
-        <button onclick="finishTutorial()" class="text-sm font-bold text-slate-500 hover:text-blue-600">
+        <a href="admin.html" onclick="localStorage.setItem('tutorialSeen', 'true')" class="text-sm font-bold text-slate-500 hover:text-blue-600">
             Pular Tutorial
-        </button>
+        </a>
     </nav>
 
     <header class="max-w-4xl mx-auto px-6 py-12 text-center">
@@ -63,8 +64,8 @@
         </div>
 
         <div class="text-center pt-4">
-            <button onclick="finishTutorial()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-lg">
-                Entendi, ir para o Painel
+            <button onclick="finishTutorial()" class="inline-block bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                Começar Agora
             </button>
         </div>
     </main>
