@@ -3,71 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bem-vindo | DietCMS</title>
+    <title>Como Usar | DietCMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script>
         const token = localStorage.getItem('token');
         if (!token) window.location.href = 'login.html';
 
-        // FUNÇÃO DE FINALIZAÇÃO (Agora leva direto pro Gerador)
-        function finishTutorial() {
+        // LÓGICA DE NAVEGAÇÃO
+        function skipToRecipes() {
             localStorage.setItem('tutorialSeen', 'true');
-            // O parâmetro ?action=gen avisa o admin para abrir o modal
+            // Redireciona direto para a aba de Receitas (Library)
+            window.location.href = 'admin.html?view=library';
+        }
+
+        function startNow() {
+            localStorage.setItem('tutorialSeen', 'true');
+            // Redireciona para o Gerador de Prompts
             window.location.href = 'admin.html?action=gen';
         }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10 flex justify-between items-center">
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
         <div class="flex items-center gap-2 font-bold text-xl text-blue-600">
             <i class="fa-solid fa-bicycle"></i> Diet & Ride
         </div>
-        <a href="admin.html" onclick="localStorage.setItem('tutorialSeen', 'true')" class="text-sm font-bold text-slate-500 hover:text-blue-600">
-            Pular Tutorial
-        </a>
+        <button onclick="skipToRecipes()" class="text-xs font-bold text-slate-500 hover:text-blue-600 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+            Pular para Criar Receitas <i class="fa-solid fa-forward ml-1"></i>
+        </button>
     </nav>
 
-    <header class="max-w-4xl mx-auto px-6 py-12 text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Bem-vindo ao seu Gerenciador</h1>
-        <p class="text-lg text-slate-500">Aprenda a usar a IA para criar dietas em minutos.</p>
+    <header class="max-w-3xl mx-auto px-6 py-12 text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 shadow-sm">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Domine seu Planejamento</h1>
+        <p class="text-lg text-slate-500 leading-relaxed">
+            Veja como utilizar a Inteligência Artificial para estruturar sua dieta e rotina em poucos minutos.
+        </p>
     </header>
 
-    <main class="max-w-4xl mx-auto px-6 pb-20 space-y-8">
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
-            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">1</div>
-            <div>
-                <h3 class="font-bold text-slate-800">Gerador de Prompts</h3>
-                <p class="text-sm text-slate-600">No painel, use o botão "Gerador de Prompts". Descreva o aluno e copie o texto gerado.</p>
-            </div>
-        </div>
+    <main class="max-w-3xl mx-auto px-6 pb-24 space-y-16">
+        
+        <section>
+            <h2 class="text-xl font-bold text-slate-800 mb-8 border-l-4 border-blue-600 pl-4">Passo a Passo: Gerando seu Plano</h2>
+            
+            <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
+                
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 group-[.is-active]:bg-blue-600 text-slate-500 group-[.is-active]:text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-2">1. Gere o Prompt</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">No painel, clique em <strong>"Gerador de Prompts"</strong>. Descreva seu objetivo, peso, preferências alimentares e restrições. O sistema criará um texto técnico otimizado para IA.</p>
+                    </div>
+                </div>
 
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
-            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">2</div>
-            <div>
-                <h3 class="font-bold text-slate-800">Use a IA e Importe</h3>
-                <p class="text-sm text-slate-600">Cole o prompt no ChatGPT. Copie o código JSON que ele responder e use o botão "Importar (Colar)" no painel.</p>
-            </div>
-        </div>
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <i class="fa-solid fa-robot text-sm"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-2">2. Use o ChatGPT</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Copie o texto gerado e cole no ChatGPT (ou outra IA). Ele responderá com um <strong>código JSON</strong>. Copie esse código inteiramente.</p>
+                    </div>
+                </div>
 
-        <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-start">
-            <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center font-bold flex-shrink-0">3</div>
-            <div>
-                <h3 class="font-bold text-slate-800">Publique</h3>
-                <p class="text-sm text-slate-600">Revise o plano e clique em "Publicar no App" para atualizar o aplicativo do aluno.</p>
-            </div>
-        </div>
+                <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-blue-600 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
+                        <i class="fa-solid fa-file-import text-sm"></i>
+                    </div>
+                    <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-2">3. Importe e Publique</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Volte aqui, clique em <strong>"Importar (Colar)"</strong> e cole o código. O sistema monta o calendário, lista de compras e receitas automaticamente. Clique em <strong>"Publicar no App"</strong> para finalizar.</p>
+                    </div>
+                </div>
 
-        <div class="text-center pt-4">
-            <button onclick="finishTutorial()" class="inline-block bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
-                Começar Agora
+            </div>
+        </section>
+
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800 border-l-4 border-indigo-600 pl-4">Vídeo Tutorial: Visão Geral</h2>
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-1 rounded uppercase">Fundamental</span>
+            </div>
+            
+            <div class="video-container bg-slate-900">
+                <iframe src="https://www.youtube.com/embed/SEU_VIDEO_ID_AQUI" title="Tutorial Geral" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <p class="text-sm text-slate-500 mt-3 text-center">Neste vídeo você aprenderá a navegar pelo painel, gerar seu primeiro plano e acompanhar o progresso.</p>
+        </section>
+
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800 border-l-4 border-green-600 pl-4">Tutorial: Criação de Receitas</h2>
+                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded uppercase">Avançado</span>
+            </div>
+            
+            <div class="video-container bg-slate-900">
+                <iframe src="https://www.youtube.com/embed/SEU_VIDEO_RECEITAS_AQUI" title="Criando Receitas" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <p class="text-sm text-slate-500 mt-3 text-center">Aprenda a cadastrar refeições personalizadas manualmente ou importar pacotes de receitas via IA.</p>
+        </section>
+
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 flex justify-center z-20 md:static md:border-0 md:bg-transparent md:p-0">
+            <button onclick="startNow()" class="w-full md:w-auto bg-slate-900 text-white px-10 py-4 rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl flex items-center justify-center gap-3">
+                <i class="fa-solid fa-rocket"></i> Começar Agora
             </button>
         </div>
+
     </main>
 </body>
 </html>
