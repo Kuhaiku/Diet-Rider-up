@@ -3,99 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Diet & Ride | App Protegido</title>
+    <title>Diet & Ride | App do Aluno</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <script>
-        const API_BASE = '/auth'; // Endpoint correto
+        const API_BASE = '/auth'; 
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'login.html';
+        if (!token) window.location.href = 'index.html';
 
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; height: 100dvh; }
-        .active-nav { background-color: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; font-weight: 700; }
-        .inactive-nav { border-left: 4px solid transparent; color: #64748b; }
-        .meal-card { transition: all 0.2s; border: 1px solid #e2e8f0; }
-        .meal-card:active { transform: scale(0.98); }
-        .meal-active { border: 2px solid #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1); }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; height: 100vh; overflow: hidden; }
+        
+        /* Utilitários de Scroll e Animação */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Estilos dos Cards Ativos */
+        .meal-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid transparent; }
+        .meal-card:active { transform: scale(0.97); }
+        .meal-active { border-color: #3b82f6; background-color: #eff6ff; box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.15); }
+        
+        /* Checkbox Customizado */
         .check-anim:checked + div { background-color: #22c55e; border-color: #22c55e; color: white; }
         .check-row:checked + div { opacity: 0.5; background-color: #f8fafc; }
         .check-row:checked + div span { text-decoration: line-through; color: #94a3b8; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @media (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
+        
+        /* Nav Lateral Ativa */
+        .nav-active { background-color: #eff6ff; color: #1d4ed8; font-weight: 700; border-right: 3px solid #2563eb; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row overflow-hidden bg-slate-50">
+<body class="flex flex-col md:flex-row bg-slate-50">
 
-    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden fade-in"></div>
+    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm transition-opacity"></div>
 
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-72 bg-white border-r border-slate-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl md:shadow-none h-full">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-200 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col shadow-2xl md:shadow-none h-full">
         <div class="p-6 border-b border-slate-100 flex justify-between items-center">
             <h1 class="font-bold text-xl text-slate-900 tracking-tight flex items-center gap-2">
-                <i class="fa-solid fa-bicycle text-blue-600"></i> Diet & Ride
+                <i class="fa-solid fa-leaf text-green-500"></i> DietApp
             </h1>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 space-y-6">
-            <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
-                <label class="text-[10px] font-bold text-blue-400 uppercase block mb-2">VISUALIZAÇÃO</label>
-                <div class="flex bg-white p-1 rounded-lg border border-blue-100 shadow-sm">
-                    <button onclick="setMode('day')" id="mode-day" class="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all">Hoje</button>
-                    <button onclick="setMode('week')" id="mode-week" class="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all">Semana</button>
-                </div>
+            <div class="bg-slate-100 p-1.5 rounded-xl flex">
+                <button onclick="setMode('day')" id="mode-day" class="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all shadow-sm bg-white text-blue-600">Dia (Hoje)</button>
+                <button onclick="setMode('week')" id="mode-week" class="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all text-slate-500 hover:text-slate-700">Semana (7 dias)</button>
             </div>
 
             <nav class="space-y-1">
-                <div class="px-2 pb-2 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">CARDÁPIOS</div>
-                <button onclick="nav('diet', 1)" id="nav-w1" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 transition-colors inactive-nav text-sm font-medium">Semana 1</button>
-                <button onclick="nav('diet', 2)" id="nav-w2" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 transition-colors inactive-nav text-sm font-medium">Semana 2</button>
-                <button onclick="nav('diet', 3)" id="nav-w3" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 transition-colors inactive-nav text-sm font-medium">Semana 3</button>
-                <button onclick="nav('diet', 4)" id="nav-w4" class="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 transition-colors inactive-nav text-sm font-medium">Semana 4</button>
+                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">SEU PLANO</p>
+                <button onclick="nav('diet', 1)" id="nav-w1" class="w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50">Semana 1</button>
+                <button onclick="nav('diet', 2)" id="nav-w2" class="w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50">Semana 2</button>
+                <button onclick="nav('diet', 3)" id="nav-w3" class="w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50">Semana 3</button>
+                <button onclick="nav('diet', 4)" id="nav-w4" class="w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50">Semana 4</button>
             </nav>
 
             <div class="border-t border-slate-100 my-2"></div>
 
-            <button onclick="nav('market', 0)" id="nav-market" class="w-full text-left px-4 py-3 rounded-lg hover:bg-green-50 transition-colors inactive-nav text-sm font-medium group flex items-center justify-between text-slate-600">
-                <span><i class="fa-solid fa-basket-shopping mr-2 text-slate-400 group-hover:text-green-600"></i> Mercado</span>
+            <button onclick="nav('market', 0)" id="nav-market" class="w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-bold text-slate-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center"><i class="fa-solid fa-basket-shopping"></i></span>
+                Lista de Compras
             </button>
 
-            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mt-4">
-                <div class="flex justify-between items-center mb-3 text-sm">
-                    <div class="text-center w-1/2">
-                        <label class="block text-[10px] font-bold text-slate-400">ATUAL</label>
-                        <input type="number" id="current-weight" class="bg-transparent border-b border-dashed border-slate-300 w-full text-center font-bold text-slate-700 focus:outline-none focus:border-blue-500" onchange="updateWeight()">
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-300 text-xs mx-2"></i>
-                    <div class="text-center w-1/2">
-                        <label class="block text-[10px] font-bold text-slate-400">META</label>
-                        <input type="number" id="target-weight" class="bg-transparent border-b border-dashed border-slate-300 w-full text-center font-bold text-green-600 focus:outline-none focus:border-green-500" onchange="updateWeight()">
-                    </div>
-                </div>
-                <div class="w-full bg-slate-200 rounded-full h-1.5 mb-1 overflow-hidden">
-                    <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-1000" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="mt-auto border-t border-slate-100 pt-4">
-                <a href="admin.html" class="flex items-center w-full px-4 py-3 text-xs font-bold text-slate-400 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors gap-2">
-                    <i class="fa-solid fa-user-gear"></i> Área Administrativa
-                </a>
-                <button onclick="logout()" class="flex items-center w-full px-4 py-3 mt-1 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors gap-2">
+            <div class="mt-auto pt-6">
+                <button onclick="logout()" class="flex items-center w-full px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-colors gap-2">
                     <i class="fa-solid fa-right-from-bracket"></i> Sair
                 </button>
             </div>
@@ -103,61 +92,64 @@
     </aside>
 
     <div class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20 flex-shrink-0">
-        <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fa-solid fa-bicycle text-blue-600"></i> Diet & Ride</span>
-        <button onclick="toggleSidebar()" class="p-2 text-slate-600 bg-slate-50 rounded-lg"><i class="fa-solid fa-bars text-xl"></i></button>
+        <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fa-solid fa-leaf text-green-500"></i> DietApp</span>
+        <button onclick="toggleSidebar()" class="p-2 text-slate-600 bg-slate-50 rounded-lg active:scale-95 transition-transform"><i class="fa-solid fa-bars text-xl"></i></button>
     </div>
 
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 md:ml-72 transition-all duration-300 h-full relative">
-        <div id="app-loading" class="absolute inset-0 flex items-center justify-center bg-slate-50 z-50">
-            <div class="flex flex-col items-center">
-                <div class="loader mb-2"></div>
-                <p class="text-xs font-bold text-slate-400">Sincronizando...</p>
-            </div>
+    <main class="flex-1 overflow-y-auto bg-slate-50 h-full relative md:ml-72 scroll-smooth">
+        
+        <div id="app-loading" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-50">
+            <div class="loader mb-4"></div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Sincronizando Dieta...</p>
         </div>
 
-        <div id="view-diet" class="hidden max-w-5xl mx-auto fade-in pb-40">
-            <div class="mb-4 md:mb-8">
-                <span class="text-blue-600 font-bold text-[10px] md:text-xs tracking-wider uppercase bg-blue-50 px-2 py-1 rounded inline-block mb-2" id="diet-subtitle">SEMANA 1</span>
-                <h2 class="text-xl md:text-3xl font-bold text-slate-800 leading-tight break-words" id="diet-title">Carregando...</h2>
-                <p class="text-slate-500 text-xs md:text-sm mt-1 leading-snug" id="diet-desc">...</p>
+        <div id="view-diet" class="hidden p-4 md:p-8 pb-40 max-w-5xl mx-auto fade-in">
+            <div class="mb-6 md:mb-8">
+                <span class="text-blue-600 font-bold text-[10px] md:text-xs tracking-wider uppercase bg-blue-50 px-2.5 py-1 rounded-md inline-block mb-2" id="diet-subtitle">SEMANA 1</span>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900 leading-tight" id="diet-title">Carregando...</h2>
+                <p class="text-slate-500 text-sm mt-1" id="diet-desc">...</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-4 grid grid-cols-2 md:grid-cols-1 gap-3">
-                    <div onclick="selectMeal('cafe')" id="card-cafe" class="meal-card bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer">
-                        <div class="bg-yellow-100 text-yellow-600 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-mug-hot"></i></div>
-                        <div class="min-w-0"><span class="text-[10px] font-bold text-slate-400 uppercase block">CAFÉ</span><p class="font-bold text-slate-800 text-sm truncate">Manhã</p></div>
+                <div class="lg:col-span-4 grid grid-cols-2 lg:grid-cols-1 gap-3 content-start">
+                    <div onclick="selectMeal('cafe')" id="card-cafe" class="meal-card bg-white p-4 rounded-2xl cursor-pointer flex flex-col items-center text-center lg:flex-row lg:text-left gap-3 shadow-sm hover:shadow-md">
+                        <div class="bg-amber-100 text-amber-600 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-mug-hot"></i></div>
+                        <div><span class="text-[10px] font-bold text-slate-400 uppercase block">CAFÉ DA MANHÃ</span><p class="font-bold text-slate-700 text-sm">Energia Inicial</p></div>
                     </div>
-                    <div onclick="selectMeal('almoco')" id="card-almoco" class="meal-card bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer">
-                        <div class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-200"><i class="fa-solid fa-utensils"></i></div>
-                        <div class="min-w-0"><span class="text-[10px] font-bold text-blue-400 uppercase block">ALMOÇO</span><p class="font-bold text-slate-800 text-sm truncate">Principal</p></div>
+                    <div onclick="selectMeal('almoco')" id="card-almoco" class="meal-card bg-white p-4 rounded-2xl cursor-pointer flex flex-col items-center text-center lg:flex-row lg:text-left gap-3 shadow-sm hover:shadow-md">
+                        <div class="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-utensils"></i></div>
+                        <div><span class="text-[10px] font-bold text-slate-400 uppercase block">ALMOÇO</span><p class="font-bold text-slate-700 text-sm">Refeição Principal</p></div>
                     </div>
-                    <div onclick="selectMeal('lanche')" id="card-lanche" class="meal-card bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer">
+                    <div onclick="selectMeal('lanche')" id="card-lanche" class="meal-card bg-white p-4 rounded-2xl cursor-pointer flex flex-col items-center text-center lg:flex-row lg:text-left gap-3 shadow-sm hover:shadow-md">
                         <div class="bg-orange-100 text-orange-600 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-bolt"></i></div>
-                        <div class="min-w-0"><span class="text-[10px] font-bold text-slate-400 uppercase block">LANCHE</span><p class="font-bold text-slate-800 text-sm truncate">Pré-Treino</p></div>
+                        <div><span class="text-[10px] font-bold text-slate-400 uppercase block">LANCHE</span><p class="font-bold text-slate-700 text-sm">Pré-Treino / Tarde</p></div>
                     </div>
-                    <div onclick="selectMeal('jantar')" id="card-jantar" class="meal-card bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer">
+                    <div onclick="selectMeal('jantar')" id="card-jantar" class="meal-card bg-white p-4 rounded-2xl cursor-pointer flex flex-col items-center text-center lg:flex-row lg:text-left gap-3 shadow-sm hover:shadow-md">
                         <div class="bg-indigo-100 text-indigo-600 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-moon"></i></div>
-                        <div class="min-w-0"><span class="text-[10px] font-bold text-slate-400 uppercase block">JANTAR</span><p class="font-bold text-slate-800 text-sm truncate">Ceia</p></div>
+                        <div><span class="text-[10px] font-bold text-slate-400 uppercase block">JANTAR</span><p class="font-bold text-slate-700 text-sm">Recuperação</p></div>
                     </div>
                 </div>
 
                 <div class="lg:col-span-8">
-                    <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden min-h-[400px] fade-in" id="detail-panel">
-                        <div class="bg-slate-800 p-5 md:p-6 text-white">
-                            <h3 class="font-bold text-lg md:text-xl flex items-center gap-2">
-                                <i class="fa-solid fa-clipboard-check text-blue-400"></i> 
-                                <span id="detail-title" class="break-words">Selecione...</span>
-                            </h3>
-                            <p class="text-slate-400 text-xs mt-1" id="detail-subtitle">Ingredientes e Modo de Preparo</p>
+                    <div class="bg-white rounded-3xl shadow-lg shadow-slate-200/50 overflow-hidden border border-slate-100 min-h-[400px]" id="detail-panel">
+                        <div class="bg-slate-900 p-6 md:p-8 text-white relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-8 opacity-10 text-9xl transform translate-x-10 -translate-y-10"><i class="fa-solid fa-utensils"></i></div>
+                            <h3 class="font-bold text-xl md:text-2xl relative z-10" id="detail-title">Selecione uma refeição</h3>
+                            <p class="text-slate-400 text-sm mt-1 relative z-10" id="detail-subtitle">Veja os ingredientes e preparo</p>
                         </div>
-                        <div class="p-5 md:p-6">
+                        
+                        <div class="p-6 md:p-8">
                             <div class="mb-8">
-                                <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wide border-b border-slate-100 pb-2 mb-4">Ingredientes</h4>
+                                <h4 class="font-bold text-slate-800 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-basket-shopping text-blue-500"></i> Ingredientes
+                                </h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="ingredient-list"></div>
                             </div>
+
                             <div>
-                                <h4 class="font-bold text-slate-800 text-sm uppercase tracking-wide border-b border-slate-100 pb-2 mb-4">Modo de Preparo</h4>
+                                <h4 class="font-bold text-slate-800 text-xs uppercase tracking-widest border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-fire-burner text-orange-500"></i> Modo de Preparo
+                                </h4>
                                 <div class="space-y-4" id="step-list"></div>
                             </div>
                         </div>
@@ -166,129 +158,416 @@
             </div>
         </div>
 
-        <div id="view-market" class="hidden max-w-4xl mx-auto fade-in pb-40">
-            <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 sticky top-0 z-10 gap-4">
-                <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
-                    <button onclick="setMarketFilter('all')" id="btn-filt-all" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow">TUDO</button>
-                    <button onclick="setMarketFilter(1)" id="btn-filt-1" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Sem 1</button>
-                    <button onclick="setMarketFilter(2)" id="btn-filt-2" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Sem 2</button>
-                    <button onclick="setMarketFilter(3)" id="btn-filt-3" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Sem 3</button>
-                    <button onclick="setMarketFilter(4)" id="btn-filt-4" class="whitespace-nowrap px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">Sem 4</button>
-                </div>
-                <div class="text-right w-full md:w-auto">
-                    <p class="text-[10px] uppercase font-bold text-slate-400" id="market-total-label">TOTAL MÊS</p>
-                    <p class="text-xl font-bold text-green-600" id="market-total">R$ 0,00</p>
+        <div id="view-market" class="hidden p-4 md:p-8 pb-40 max-w-4xl mx-auto fade-in">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 sticky top-0 z-10">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 no-scrollbar">
+                        <button onclick="setMarketFilter('all')" id="btn-filt-all" class="px-4 py-2 rounded-full text-xs font-bold bg-slate-900 text-white shadow-md whitespace-nowrap">MÊS TODO</button>
+                        <button onclick="setMarketFilter(1)" id="btn-filt-1" class="px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Sem 1</button>
+                        <button onclick="setMarketFilter(2)" id="btn-filt-2" class="px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Sem 2</button>
+                        <button onclick="setMarketFilter(3)" id="btn-filt-3" class="px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Sem 3</button>
+                        <button onclick="setMarketFilter(4)" id="btn-filt-4" class="px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Sem 4</button>
+                    </div>
+                    
+                    <div class="text-right bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 w-full md:w-auto">
+                        <p class="text-[10px] uppercase font-bold text-slate-400" id="market-total-label">Estimativa Total</p>
+                        <p class="text-xl font-bold text-green-600" id="market-total">R$ 0,00</p>
+                    </div>
                 </div>
             </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="market-grid"></div>
+        </div>
+
+        <div id="no-plan-view" class="hidden flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
+            <div class="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                <i class="fa-solid fa-carrot text-4xl text-orange-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Nenhum plano ativo</h2>
+            <p class="text-slate-500 max-w-sm">Seu nutricionista ainda não publicou sua dieta para este período. Aguarde a notificação.</p>
+            <button onclick="location.reload()" class="mt-8 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors">Verificar Novamente</button>
         </div>
 
     </main>
 
-<script>
-    function toggleSidebar() { const sb = document.getElementById('sidebar'); const ov = document.getElementById('mobile-overlay'); if(sb.classList.contains('-translate-x-full')) { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); } else { sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); } }
+    <script>
+        // --- ESTADO GLOBAL ---
+        let weeksData = {}; 
+        let state = { 
+            week: 1, 
+            selectedMeal: 'almoco', 
+            mode: 'week', // 'day' ou 'week'
+            marketFilter: 'all', 
+            prices: JSON.parse(localStorage.getItem('prices_v1')) || {}, 
+            checks: JSON.parse(localStorage.getItem('checks_v1')) || {} 
+        };
 
-    let weeksData = {};
-    let state = { week: 1, selectedMeal: 'almoco', mode: 'week', marketFilter: 'all', prices: JSON.parse(localStorage.getItem('pricesV23')) || {}, checks: JSON.parse(localStorage.getItem('checksV23')) || {} };
-    const categories = { 'carnes': { label: 'Açougue', icon: 'fa-drumstick-bite', color: 'text-red-600', bg: 'bg-red-50' }, 'horti': { label: 'Hortifruti', icon: 'fa-carrot', color: 'text-green-600', bg: 'bg-green-50' }, 'mercearia': { label: 'Mercearia', icon: 'fa-jar', color: 'text-yellow-600', bg: 'bg-yellow-50' }, 'outros': { label: 'Outros', icon: 'fa-box-open', color: 'text-blue-600', bg: 'bg-blue-50' } };
+        const categories = { 
+            'carnes': { label: 'Açougue & Proteínas', icon: 'fa-drumstick-bite', color: 'text-red-600', bg: 'bg-red-50' }, 
+            'horti': { label: 'Hortifruti & Verduras', icon: 'fa-carrot', color: 'text-green-600', bg: 'bg-green-50' }, 
+            'mercearia': { label: 'Mercearia & Grãos', icon: 'fa-jar', color: 'text-amber-600', bg: 'bg-amber-50' }, 
+            'outros': { label: 'Outros Itens', icon: 'fa-box-open', color: 'text-blue-600', bg: 'bg-blue-50' } 
+        };
 
-    async function init() {
-        document.getElementById('current-weight').value = localStorage.getItem('dietWeightCurrent') || 90;
-        document.getElementById('target-weight').value = localStorage.getItem('dietWeightTarget') || 75;
-        updateWeight();
-        
-        await loadActivePlan(); // CARREGA DA NUVEM
-        
-        setMode('week'); 
-        nav('diet', 1);
-    }
+        // --- INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', init);
 
-    async function loadActivePlan() {
-        try {
-            const res = await fetch(`${API_BASE}/get-active-plan`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            
-            if(res.ok) {
-                const rawData = await res.json();
-                if(rawData) {
-                    // MÁGICA: Converte o formato do Banco para o formato do App
-                    weeksData = transformPlanToAppData(rawData);
-                } else {
-                    alert("Nenhum plano ativo encontrado. Vá ao Admin e salve um plano como ativo.");
-                    weeksData = { 1: { headerTitle: "Sem Dados", headerSubtitle: "Crie um plano no Admin", meals: {}, market: [] } };
-                }
-            } else {
-                console.error("Erro ao carregar");
-            }
-        } catch(e) {
-            console.error(e);
-            alert("Erro de conexão.");
-        } finally {
-            document.getElementById('app-loading').classList.add('hidden');
+        async function init() {
+            await loadActivePlan();
         }
-    }
 
-    // Função que converte o JSON do Admin (Library/Planner) para o JSON do App (WeeksData)
-    function transformPlanToAppData(dbData) {
-        let d = {};
-        const { library, planner, themes } = dbData;
-        
-        [1,2,3,4].forEach(w => {
-            let meals = {};
-            let marketList = [];
-            
-            ['cafe','almoco','lanche','jantar'].forEach(slot => {
-                const recipeId = planner[w] ? planner[w][slot] : null;
-                const recipe = library.find(r => r.id === recipeId);
+        // --- LÓGICA DE DADOS (CORE) ---
+        async function loadActivePlan() {
+            const loading = document.getElementById('app-loading');
+            const noPlan = document.getElementById('no-plan-view');
+            const dietView = document.getElementById('view-diet');
+
+            try {
+                // Chama o Backend
+                const res = await fetch(`${API_BASE}/get-active-plan`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 
-                if(recipe) {
-                    meals[slot] = { 
-                        name: recipe.name, 
-                        ingredients: recipe.ingredients, 
-                        steps: recipe.steps 
-                    };
-
-                    // Adiciona ao mercado da semana
-                    recipe.ingredients.forEach(ing => {
-                        let existing = marketList.find(x => x.n.toLowerCase() === ing.n.toLowerCase());
-                        let qtd = parseFloat(ing.q_daily || ing.q_week || 0); // O Admin agora salva q_daily
-                        
-                        if(existing) {
-                            existing.q_daily += qtd;
-                        } else {
-                            marketList.push({
-                                ...ing, 
-                                q_daily: qtd,
-                                id: ing.n.replace(/[^a-z0-9]/gi,'') // ID único para o check
-                            });
-                        }
-                    });
+                if (res.status === 404) {
+                    loading.classList.add('hidden');
+                    noPlan.classList.remove('hidden');
+                    return;
                 }
+
+                if (!res.ok) throw new Error('Erro na requisição');
+
+                const rawData = await res.json();
+                
+                // Transforma JSON do Banco em JSON do App
+                weeksData = transformPlanToAppData(rawData);
+
+                // Inicia UI
+                loading.classList.add('hidden');
+                dietView.classList.remove('hidden');
+                setMode('week'); // Padrão: Visão Semanal
+                nav('diet', 1);
+
+            } catch (error) {
+                console.error(error);
+                loading.innerHTML = '<p class="text-red-500 font-bold">Erro de Conexão</p>';
+            }
+        }
+
+        // Converte a estrutura Library/Planner para Semanas/Refeições
+        function transformPlanToAppData(dbData) {
+            let d = {};
+            const { library, planner, themes } = dbData;
+            
+            // Loop pelas 4 semanas
+            [1,2,3,4].forEach(w => {
+                let meals = {};
+                let marketList = [];
+                
+                // Loop pelos slots
+                ['cafe','almoco','lanche','jantar'].forEach(slot => {
+                    const recipeId = planner[w] ? planner[w][slot] : null;
+                    const recipe = library.find(r => r.id === recipeId);
+                    
+                    if(recipe) {
+                        // Monta objeto da refeição
+                        meals[slot] = { 
+                            name: recipe.name, 
+                            ingredients: recipe.ingredients, 
+                            steps: recipe.steps 
+                        };
+
+                        // Adiciona ao mercado da semana (agregando quantidades)
+                        recipe.ingredients.forEach(ing => {
+                            // Tenta achar ingrediente existente na lista desta semana
+                            let existing = marketList.find(x => x.n.toLowerCase() === ing.n.toLowerCase());
+                            
+                            // O banco SEMPRE manda q_daily.
+                            let qtd = parseFloat(ing.q_daily || 0);
+                            
+                            if(existing) {
+                                existing.q_daily += qtd;
+                            } else {
+                                marketList.push({
+                                    ...ing, 
+                                    q_daily: qtd,
+                                    id: ing.n.replace(/[^a-z0-9]/gi,'') // ID simples para checkbox
+                                });
+                            }
+                        });
+                    }
+                });
+
+                d[w] = {
+                    headerTitle: `Semana ${w}`,
+                    headerSubtitle: themes[w] || "Foco da Semana",
+                    meals: meals,
+                    market: marketList
+                };
             });
+            return d;
+        }
 
-            d[w] = {
-                headerTitle: `Semana ${w}`,
-                headerSubtitle: themes[w] || "",
-                meals: meals,
-                market: marketList
-            };
-        });
-        return d;
-    }
+        // --- FUNÇÕES UI ---
+        
+        // Formata Quantidade: Se > 1000g vira kg
+        function formatDisplay(q, u) { 
+            let val = parseFloat(q); 
+            let unit = u ? u.toLowerCase() : ''; 
+            
+            if (unit === 'g' && val >= 1000) { return { v: val/1000, u: 'kg' }; } 
+            if (unit === 'ml' && val >= 1000) { return { v: val/1000, u: 'l' }; } 
+            
+            return { v: val, u: unit }; 
+        }
 
-    function formatDisplay(q, u) { let val = parseFloat(q); let unit = u.toLowerCase(); if (unit === 'g' && val >= 1000) { return { v: val/1000, u: 'kg' }; } if (unit === 'ml' && val >= 1000) { return { v: val/1000, u: 'l' }; } return { v: val, u: unit }; }
-    function setMode(m) { state.mode = m; const btnDay = document.getElementById('mode-day'); const btnWeek = document.getElementById('mode-week'); if(m==='day') { btnDay.className="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all bg-blue-600 text-white shadow"; btnWeek.className="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all text-blue-600 hover:bg-blue-50"; } else { btnWeek.className="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all bg-blue-600 text-white shadow"; btnDay.className="flex-1 py-1.5 text-xs font-bold rounded text-center transition-all text-blue-600 hover:bg-blue-50"; } renderDetails(); renderMarket(); }
-    function nav(view, val) { if(window.innerWidth < 768) { const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); } document.querySelectorAll('aside button').forEach(b => { if(b.id.startsWith('nav-')) b.className = "w-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 transition-colors inactive-nav text-sm font-medium"; if(b.id === 'nav-market') b.className += " group flex items-center justify-between text-slate-600"; }); if(view === 'diet') { state.week = val; document.getElementById(`nav-w${val}`).className = "w-full text-left px-4 py-3 rounded-lg bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-bold text-sm transition-colors"; document.getElementById('view-diet').classList.remove('hidden'); document.getElementById('view-market').classList.add('hidden'); const wd = weeksData[val] || { headerTitle: `Semana ${val}`, headerSubtitle: "Sem dados" }; document.getElementById('diet-subtitle').innerText = wd.headerTitle; document.getElementById('diet-desc').innerText = wd.headerSubtitle; const mainMeal = (wd.meals && wd.meals.almoco) ? wd.meals.almoco.name : "Cardápio da Semana"; document.getElementById('diet-title').innerText = mainMeal; selectMeal(state.selectedMeal); } else { state.marketFilter = 'all'; document.getElementById('nav-market').className = "w-full text-left px-4 py-3 rounded-lg bg-green-50 text-green-800 border-l-4 border-green-600 font-bold text-sm transition-colors group flex items-center justify-between"; document.getElementById('view-diet').classList.add('hidden'); document.getElementById('view-market').classList.remove('hidden'); setMarketFilter('all'); } }
-    function selectMeal(type) { state.selectedMeal = type; ['cafe','almoco','lanche','jantar'].forEach(c => { const el = document.getElementById(`card-${c}`); if(c === type) el.className = "meal-card meal-active bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer transform scale-105"; else el.className = "meal-card bg-white p-3 rounded-xl flex flex-col md:flex-row gap-3 items-center text-center md:text-left cursor-pointer opacity-70 hover:opacity-100"; }); renderDetails(); }
-    function renderDetails() { const week = weeksData[state.week] || {}; const meal = (week.meals && week.meals[state.selectedMeal]) ? week.meals[state.selectedMeal] : null; const titleEl = document.getElementById('detail-title'); const listIng = document.getElementById('ingredient-list'); const listStep = document.getElementById('step-list'); if(!meal) { titleEl.innerText = "Refeição não planejada"; listIng.innerHTML = "<p class='text-sm text-slate-400'>Nenhum ingrediente cadastrado.</p>"; listStep.innerHTML = ""; return; } titleEl.innerText = meal.name; document.getElementById('detail-subtitle').innerText = state.mode === 'week' ? "Ingredientes para 7 dias" : "Ingredientes para hoje (1 dia)"; listIng.innerHTML = (meal.ingredients || []).map(i => { let dailyQty = parseFloat(i.q_daily || i.q_week || 0); let unit = i.u ? i.u.toLowerCase() : ''; let finalQty = state.mode === 'week' ? dailyQty * 7 : dailyQty; let fmt = formatDisplay(finalQty, unit); let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(2)); return `<label class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer group hover:bg-blue-50 transition-colors"><input type="checkbox" class="hidden check-anim"><div class="w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div><div class="flex-1"><p class="font-bold text-slate-700 text-sm leading-tight">${i.n}</p><p class="text-xs text-blue-500 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p></div></label>`; }).join(''); listStep.innerHTML = (meal.steps || []).map((s, idx) => { const txt = s.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900">$1</strong>'); return `<div class="flex gap-4 items-start"><span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold mt-0.5">${idx+1}</span><p class="text-sm text-slate-600 leading-relaxed">${txt}</p></div>`; }).join(''); const p = document.getElementById('detail-panel'); p.classList.remove('fade-in'); void p.offsetWidth; p.classList.add('fade-in'); }
-    function setMarketFilter(f) { state.marketFilter = f; ['all',1,2,3,4].forEach(t => { const btn = document.getElementById(`btn-filt-${t}`); if(t == f) btn.className = "whitespace-nowrap px-4 py-2 rounded-lg text-xs font-bold bg-slate-800 text-white shadow"; else btn.className = "whitespace-nowrap px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"; }); renderMarket(); }
-    function renderMarket() { const grid = document.getElementById('market-grid'); grid.innerHTML = ''; let grandTotal = 0; let items = []; if(state.marketFilter === 'all') { let agg = {}; for(let w=1; w<=4; w++) { if(weeksData[w] && weeksData[w].market) { weeksData[w].market.forEach(i => { let val = parseFloat(i.q_daily || i.q_week || 0); if(agg[i.n]) agg[i.n].q_daily += val; else { agg[i.n] = {...i}; agg[i.n].q_daily = val; } }); } } items = Object.values(agg); } else { const wd = weeksData[state.marketFilter]; items = (wd && wd.market) ? [...wd.market] : []; } const grouped = { carnes:[], horti:[], mercearia:[], outros:[] }; items.forEach(i => { if(grouped[i.cat]) grouped[i.cat].push(i); else grouped['outros'].push(i); }); Object.keys(categories).forEach(catKey => { if(grouped[catKey].length === 0) return; const catInfo = categories[catKey]; let rows = grouped[catKey].map(item => { let daily = parseFloat(item.q_daily || item.q_week || 0); let finalQty = state.mode === 'week' ? daily * 7 : daily; let fmt = formatDisplay(finalQty, item.u || ''); let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(2)); const pid = item.id || item.n.replace(/[^a-z0-9]/gi,''); const price = state.prices[pid] || 0; const sub = price * finalQty; grandTotal += sub; const isChecked = state.checks[`${pid}_${state.marketFilter}`]; return `<div class="flex items-center justify-between p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors"><div class="flex items-center gap-3 flex-1 min-w-0"><label class="cursor-pointer relative flex-shrink-0"><input type="checkbox" class="hidden check-row" ${isChecked?'checked':''} onchange="toggleCheck('${pid}')"><div class="w-5 h-5 border-2 border-slate-300 rounded flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div></label><div class="min-w-0 ${isChecked ? 'opacity-50 line-through text-slate-400' : ''}"><p class="text-sm font-bold text-slate-700 leading-tight truncate">${item.n}</p><p class="text-[10px] text-blue-500 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p></div></div><div class="text-right flex-shrink-0 ml-2"><input type="number" placeholder="0.00" class="w-16 text-right text-xs bg-slate-100 rounded px-1 py-1 mb-0.5 focus:bg-white border border-transparent focus:border-blue-300 outline-none" value="${price||''}" onchange="updatePrice('${pid}', this.value)"><p class="text-[10px] font-bold text-slate-500">R$ ${sub.toFixed(2)}</p></div></div>`; }).join(''); grid.innerHTML += `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"><div class="p-3 ${catInfo.bg} flex items-center gap-2 border-b border-slate-100"><i class="fa-solid ${catInfo.icon} ${catInfo.color}"></i><h4 class="font-bold text-sm text-slate-700">${catInfo.label}</h4></div><div>${rows}</div></div>`; }); document.getElementById('market-total').innerText = `R$ ${grandTotal.toFixed(2)}`; document.getElementById('market-total-label').innerText = state.marketFilter === 'all' ? "TOTAL MÊS" : "TOTAL SEMANA"; }
-    function updatePrice(id, val) { state.prices[id] = parseFloat(val)||0; localStorage.setItem('pricesV23', JSON.stringify(state.prices)); renderMarket(); }
-    function toggleCheck(id) { const k = `${id}_${state.marketFilter}`; state.checks[k] = !state.checks[k]; localStorage.setItem('checksV23', JSON.stringify(state.checks)); renderMarket(); }
-    function updateWeight() { const c = parseFloat(document.getElementById('current-weight').value)||0, t = parseFloat(document.getElementById('target-weight').value)||0; localStorage.setItem('dietWeightCurrent', c); localStorage.setItem('dietWeightTarget', t); if(c>0 && t>0) { const pct = Math.min(100, Math.max(0, (t/c)*100)); document.getElementById('progress-bar').style.width = `${pct}%`; } }
+        // Alterna entre Dia e Semana
+        function setMode(m) { 
+            state.mode = m; 
+            const btnDay = document.getElementById('mode-day'); 
+            const btnWeek = document.getElementById('mode-week'); 
+            
+            if(m === 'day') { 
+                btnDay.className="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all shadow-md bg-blue-600 text-white transform scale-105"; 
+                btnWeek.className="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all text-slate-500 hover:bg-slate-100"; 
+            } else { 
+                btnWeek.className="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all shadow-md bg-blue-600 text-white transform scale-105"; 
+                btnDay.className="flex-1 py-2 text-xs font-bold rounded-lg text-center transition-all text-slate-500 hover:bg-slate-100"; 
+            } 
+            renderDetails(); 
+            renderMarket(); 
+        }
 
-    init();
-</script>
+        // Navegação Principal (Sidebar)
+        function nav(view, val) { 
+            // Fecha Sidebar no Mobile se estiver aberta
+            if(window.innerWidth < 768) { 
+                const sb = document.getElementById('sidebar'); 
+                const ov = document.getElementById('mobile-overlay');
+                if(!sb.classList.contains('-translate-x-full')) {
+                    sb.classList.add('-translate-x-full'); 
+                    ov.classList.add('hidden');
+                }
+            } 
+
+            // Atualiza botões da Sidebar
+            document.querySelectorAll('aside nav button').forEach(b => b.className = "w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-medium text-slate-600 hover:bg-slate-50");
+            document.getElementById('nav-market').className = "w-full text-left px-4 py-3 rounded-xl transition-colors text-sm font-bold text-slate-700 hover:bg-green-50 hover:text-green-700 flex items-center gap-3";
+
+            if(view === 'diet') { 
+                state.week = val; 
+                document.getElementById(`nav-w${val}`).className = "w-full text-left px-4 py-3 rounded-xl bg-blue-50 text-blue-700 font-bold text-sm shadow-sm border border-blue-100"; 
+                document.getElementById('view-diet').classList.remove('hidden'); 
+                document.getElementById('view-market').classList.add('hidden'); 
+                
+                const wd = weeksData[val] || { headerTitle: `Semana ${val}`, headerSubtitle: "Sem dados" }; 
+                document.getElementById('diet-subtitle').innerText = wd.headerTitle; 
+                document.getElementById('diet-desc').innerText = wd.headerSubtitle; 
+                
+                // Tenta pegar o nome do almoço para o título principal, ou fallback
+                const mainMeal = (wd.meals && wd.meals.almoco) ? wd.meals.almoco.name : "Cardápio da Semana"; 
+                document.getElementById('diet-title').innerText = mainMeal; 
+                
+                selectMeal(state.selectedMeal); 
+            } else { 
+                state.marketFilter = 'all'; 
+                document.getElementById('nav-market').className = "w-full text-left px-4 py-3 rounded-xl bg-green-50 text-green-800 font-bold text-sm shadow-sm border border-green-100 flex items-center gap-3"; 
+                document.getElementById('view-diet').classList.add('hidden'); 
+                document.getElementById('view-market').classList.remove('hidden'); 
+                setMarketFilter('all'); 
+            } 
+        }
+
+        function selectMeal(type) { 
+            state.selectedMeal = type; 
+            ['cafe','almoco','lanche','jantar'].forEach(c => { 
+                const el = document.getElementById(`card-${c}`); 
+                if(c === type) el.classList.add('meal-active', 'transform', 'scale-105');
+                else el.classList.remove('meal-active', 'transform', 'scale-105');
+            }); 
+            renderDetails(); 
+        }
+
+        function renderDetails() { 
+            const week = weeksData[state.week] || {}; 
+            const meal = (week.meals && week.meals[state.selectedMeal]) ? week.meals[state.selectedMeal] : null; 
+            const titleEl = document.getElementById('detail-title'); 
+            const listIng = document.getElementById('ingredient-list'); 
+            const listStep = document.getElementById('step-list'); 
+            
+            // Animação de troca
+            const panel = document.getElementById('detail-panel');
+            panel.classList.remove('fade-in');
+            void panel.offsetWidth; 
+            panel.classList.add('fade-in');
+
+            if(!meal) { 
+                titleEl.innerText = "Refeição não planejada"; 
+                listIng.innerHTML = "<p class='text-sm text-slate-400 p-4'>Nenhum ingrediente cadastrado para esta refeição.</p>"; 
+                listStep.innerHTML = ""; 
+                return; 
+            } 
+            
+            titleEl.innerText = meal.name; 
+            document.getElementById('detail-subtitle').innerText = state.mode === 'week' ? "Visualizando totais para 7 dias" : "Visualizando para hoje (1 dia)"; 
+            
+            listIng.innerHTML = (meal.ingredients || []).map(i => { 
+                // LÓGICA DE MULTIPLICAÇÃO: Se mode == week, multiplica por 7
+                let dailyQty = parseFloat(i.q_daily || 0); 
+                let finalQty = state.mode === 'week' ? dailyQty * 7 : dailyQty; 
+                let fmt = formatDisplay(finalQty, i.u); 
+                let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(1)); 
+                
+                return `
+                <div class="flex items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center mr-3 shadow-sm">
+                        <i class="fa-solid fa-check text-[10px] text-slate-300"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-slate-700 text-sm leading-tight">${i.n}</p>
+                        <p class="text-xs text-blue-600 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p>
+                    </div>
+                </div>`; 
+            }).join(''); 
+            
+            listStep.innerHTML = (meal.steps || []).map((s, idx) => { 
+                return `
+                <div class="flex gap-4 items-start">
+                    <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold mt-0.5 shadow-sm">${idx+1}</span>
+                    <p class="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-lg w-full border border-slate-100">${s}</p>
+                </div>`; 
+            }).join(''); 
+        }
+
+        // --- MERCADO ---
+        function setMarketFilter(f) { 
+            state.marketFilter = f; 
+            ['all',1,2,3,4].forEach(t => { 
+                const btn = document.getElementById(`btn-filt-${t}`); 
+                if(t == f) btn.className = "px-4 py-2 rounded-full text-xs font-bold bg-slate-900 text-white shadow-md whitespace-nowrap transition-all"; 
+                else btn.className = "px-4 py-2 rounded-full text-xs font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 whitespace-nowrap transition-all"; 
+            }); 
+            renderMarket(); 
+        }
+
+        function renderMarket() { 
+            const grid = document.getElementById('market-grid'); 
+            grid.innerHTML = ''; 
+            let grandTotal = 0; 
+            let items = []; 
+            
+            // Lógica de Agregação de Itens
+            if(state.marketFilter === 'all') { 
+                // Junta tudo das 4 semanas
+                let agg = {}; 
+                for(let w=1; w<=4; w++) { 
+                    if(weeksData[w] && weeksData[w].market) { 
+                        weeksData[w].market.forEach(i => { 
+                            let val = parseFloat(i.q_daily || 0); 
+                            if(agg[i.n]) agg[i.n].q_daily += val; 
+                            else { 
+                                agg[i.n] = {...i}; 
+                                agg[i.n].q_daily = val; 
+                            } 
+                        }); 
+                    } 
+                } 
+                items = Object.values(agg); 
+            } else { 
+                // Apenas semana selecionada
+                const wd = weeksData[state.marketFilter]; 
+                items = (wd && wd.market) ? [...wd.market] : []; 
+            } 
+
+            // Agrupa por Categoria
+            const grouped = { carnes:[], horti:[], mercearia:[], outros:[] }; 
+            items.forEach(i => { 
+                const cat = i.cat || 'outros';
+                if(grouped[cat]) grouped[cat].push(i); 
+                else grouped['outros'].push(i); 
+            }); 
+
+            Object.keys(categories).forEach(catKey => { 
+                if(grouped[catKey].length === 0) return; 
+                const catInfo = categories[catKey]; 
+                
+                let rows = grouped[catKey].map(item => { 
+                    // Mercado sempre calcula para 7 dias (SEMANAL)
+                    let daily = parseFloat(item.q_daily || 0); 
+                    let finalQty = daily * 7; 
+                    
+                    let fmt = formatDisplay(finalQty, item.u || ''); 
+                    let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(1)); 
+                    
+                    const pid = item.id || item.n.replace(/[^a-z0-9]/gi,''); 
+                    const price = state.prices[pid] || 0; 
+                    const sub = price * finalQty; 
+                    grandTotal += sub; 
+                    const isChecked = state.checks[`${pid}_${state.marketFilter}`]; 
+
+                    return `
+                    <div class="flex items-center justify-between p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <label class="cursor-pointer relative flex-shrink-0">
+                                <input type="checkbox" class="hidden check-row" ${isChecked?'checked':''} onchange="toggleCheck('${pid}')">
+                                <div class="w-5 h-5 border-2 border-slate-300 rounded flex items-center justify-center transition-colors bg-white hover:border-blue-400">
+                                    <i class="fa-solid fa-check text-[10px] text-transparent"></i>
+                                </div>
+                            </label>
+                            <div class="min-w-0 ${isChecked ? 'opacity-40' : ''}">
+                                <p class="text-sm font-bold text-slate-700 leading-tight truncate ${isChecked ? 'line-through' : ''}">${item.n}</p>
+                                <p class="text-[10px] text-blue-500 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p>
+                            </div>
+                        </div>
+                        <div class="text-right flex-shrink-0 ml-2">
+                            <div class="flex items-center justify-end gap-1">
+                                <span class="text-[10px] text-slate-400">R$</span>
+                                <input type="number" placeholder="0.00" class="w-14 text-right text-xs bg-slate-100 rounded px-1 py-1 focus:bg-white border border-transparent focus:border-blue-300 outline-none transition-all" value="${price||''}" onchange="updatePrice('${pid}', this.value)">
+                            </div>
+                            <p class="text-[10px] font-bold text-slate-400 mt-1">Total: R$ ${sub.toFixed(2)}</p>
+                        </div>
+                    </div>`; 
+                }).join(''); 
+
+                grid.innerHTML += `
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 ${catInfo.bg} flex items-center gap-2 border-b border-slate-100">
+                        <div class="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <i class="fa-solid ${catInfo.icon} ${catInfo.color} text-xs"></i>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-700">${catInfo.label}</h4>
+                    </div>
+                    <div>${rows}</div>
+                </div>`; 
+            }); 
+            
+            document.getElementById('market-total').innerText = `R$ ${grandTotal.toFixed(2)}`; 
+            document.getElementById('market-total-label').innerText = state.marketFilter === 'all' ? "ESTIMATIVA MÊS" : "ESTIMATIVA SEMANA"; 
+        }
+
+        function updatePrice(id, val) { 
+            state.prices[id] = parseFloat(val)||0; 
+            localStorage.setItem('prices_v1', JSON.stringify(state.prices)); 
+            renderMarket(); 
+        }
+
+        function toggleCheck(id) { 
+            const k = `${id}_${state.marketFilter}`; 
+            state.checks[k] = !state.checks[k]; 
+            localStorage.setItem('checks_v1', JSON.stringify(state.checks)); 
+            renderMarket(); 
+        }
+
+        function toggleSidebar() { 
+            const sb = document.getElementById('sidebar'); 
+            const ov = document.getElementById('mobile-overlay'); 
+            if(sb.classList.contains('-translate-x-full')) { 
+                sb.classList.remove('-translate-x-full'); 
+                ov.classList.remove('hidden'); 
+            } else { 
+                sb.classList.add('-translate-x-full'); 
+                ov.classList.add('hidden'); 
+            } 
+        }
+    </script>
 </body>
 </html>
