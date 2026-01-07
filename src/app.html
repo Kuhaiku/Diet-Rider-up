@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Diet & Ride | App Protegido v31</title>
+    <title>Diet & Ride | App Protegido v37</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -211,6 +211,16 @@
             setMode('week'); nav('diet', 1);
         }
 
+        // --- MATH LOGIC ---
+        function formatDisplay(q, u) {
+            let val = parseFloat(q);
+            let unit = u.toLowerCase();
+            // Lógica de Conversão Visual: Só mostra kg/l se > 1000g/ml
+            if (unit === 'g' && val >= 1000) { return { v: val/1000, u: 'kg' }; }
+            if (unit === 'ml' && val >= 1000) { return { v: val/1000, u: 'l' }; }
+            return { v: val, u: unit };
+        }
+
         function setMode(m) {
             state.mode = m;
             const btnDay = document.getElementById('mode-day');
@@ -281,21 +291,13 @@
             listIng.innerHTML = (meal.ingredients || []).map(i => {
                 let dailyQty = parseFloat(i.q_daily || i.q_week || 0);
                 let unit = i.u ? i.u.toLowerCase() : '';
-                let weeklyQty = dailyQty * 7;
-                let finalQty = state.mode === 'week' ? weeklyQty : dailyQty;
-                let finalUnit = i.u || '';
+                let finalQty = state.mode === 'week' ? dailyQty * 7 : dailyQty;
+                
+                // FORMATTER
+                let fmt = formatDisplay(finalQty, unit);
+                let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(2));
 
-                if (state.mode === 'day') {
-                    if (unit === 'kg' && finalQty < 1) { finalQty *= 1000; finalUnit = 'g'; finalQty = Math.round(finalQty); }
-                    else if (unit === 'l' && finalQty < 1) { finalQty *= 1000; finalUnit = 'ml'; finalQty = Math.round(finalQty); }
-                    else if (unit === 'un') { if(finalQty > 0) finalQty = Math.max(1, Math.round(finalQty)); }
-                    else { finalQty = Number.isInteger(finalQty) ? finalQty : parseFloat(finalQty.toFixed(1)); }
-                } else {
-                    finalQty = Number.isInteger(finalQty) ? finalQty : parseFloat(finalQty.toFixed(2));
-                }
-                if(isNaN(finalQty)) finalQty = 0;
-
-                return `<label class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer group hover:bg-blue-50 transition-colors"><input type="checkbox" class="hidden check-anim"><div class="w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div><div class="flex-1"><p class="font-bold text-slate-700 text-sm leading-tight">${i.n}</p><p class="text-xs text-blue-500 font-bold mt-0.5">${finalQty} <span class="text-slate-400 font-normal lowercase">${finalUnit}</span></p></div></label>`;
+                return `<label class="flex items-center p-3 bg-slate-50 rounded-lg border border-slate-100 cursor-pointer group hover:bg-blue-50 transition-colors"><input type="checkbox" class="hidden check-anim"><div class="w-5 h-5 rounded-full border-2 border-slate-300 mr-3 flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div><div class="flex-1"><p class="font-bold text-slate-700 text-sm leading-tight">${i.n}</p><p class="text-xs text-blue-500 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p></div></label>`;
             }).join('');
 
             listStep.innerHTML = (meal.steps || []).map((s, idx) => {
@@ -347,26 +349,19 @@
                 
                 let rows = grouped[catKey].map(item => {
                     let daily = parseFloat(item.q_daily || item.q_week || 0);
-                    let weekly = daily * 7;
-                    let displayQty = state.mode === 'week' ? weekly : daily;
-                    let displayUnit = item.u || '';
-                    let unit = displayUnit.toLowerCase();
-
-                    if (state.mode === 'day') {
-                        if (unit === 'kg' && displayQty < 1) { displayQty *= 1000; displayUnit = 'g'; }
-                        else if (unit === 'l' && displayQty < 1) { displayQty *= 1000; displayUnit = 'ml'; }
-                    }
-
-                    if(isNaN(displayQty)) displayQty = 0;
-                    let fmtQty = Number.isInteger(displayQty) ? displayQty : parseFloat(displayQty.toFixed(1));
+                    let finalQty = state.mode === 'week' ? daily * 7 : daily;
+                    
+                    // FORMATTER
+                    let fmt = formatDisplay(finalQty, item.u || '');
+                    let displayVal = Number.isInteger(fmt.v) ? fmt.v : parseFloat(fmt.v.toFixed(2));
 
                     const pid = item.id || item.n.replace(/[^a-z0-9]/gi,'');
                     const price = state.prices[pid] || 0;
-                    const sub = price * (state.mode === 'week' ? weekly : daily); 
+                    const sub = price * finalQty; // Preço baseado na quantidade real (seja g ou l)
                     grandTotal += sub;
                     const isChecked = state.checks[`${pid}_${state.marketFilter}`];
 
-                    return `<div class="flex items-center justify-between p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors"><div class="flex items-center gap-3 flex-1 min-w-0"><label class="cursor-pointer relative flex-shrink-0"><input type="checkbox" class="hidden check-row" ${isChecked?'checked':''} onchange="toggleCheck('${pid}')"><div class="w-5 h-5 border-2 border-slate-300 rounded flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div></label><div class="min-w-0 ${isChecked ? 'opacity-50 line-through text-slate-400' : ''}"><p class="text-sm font-bold text-slate-700 leading-tight truncate">${item.n}</p><p class="text-[10px] text-blue-500 font-bold mt-0.5">${fmtQty} <span class="text-slate-400 font-normal lowercase">${displayUnit}</span></p></div></div><div class="text-right flex-shrink-0 ml-2"><input type="number" placeholder="0.00" class="w-16 text-right text-xs bg-slate-100 rounded px-1 py-1 mb-0.5 focus:bg-white border border-transparent focus:border-blue-300 outline-none" value="${price||''}" onchange="updatePrice('${pid}', this.value)"><p class="text-[10px] font-bold text-slate-500">R$ ${sub.toFixed(2)}</p></div></div>`;
+                    return `<div class="flex items-center justify-between p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors"><div class="flex items-center gap-3 flex-1 min-w-0"><label class="cursor-pointer relative flex-shrink-0"><input type="checkbox" class="hidden check-row" ${isChecked?'checked':''} onchange="toggleCheck('${pid}')"><div class="w-5 h-5 border-2 border-slate-300 rounded flex items-center justify-center transition-colors bg-white"><i class="fa-solid fa-check text-[10px] text-transparent"></i></div></label><div class="min-w-0 ${isChecked ? 'opacity-50 line-through text-slate-400' : ''}"><p class="text-sm font-bold text-slate-700 leading-tight truncate">${item.n}</p><p class="text-[10px] text-blue-500 font-bold mt-0.5">${displayVal} <span class="text-slate-400 font-normal lowercase">${fmt.u}</span></p></div></div><div class="text-right flex-shrink-0 ml-2"><input type="number" placeholder="0.00" class="w-16 text-right text-xs bg-slate-100 rounded px-1 py-1 mb-0.5 focus:bg-white border border-transparent focus:border-blue-300 outline-none" value="${price||''}" onchange="updatePrice('${pid}', this.value)"><p class="text-[10px] font-bold text-slate-500">R$ ${sub.toFixed(2)}</p></div></div>`;
                 }).join('');
 
                 grid.innerHTML += `<div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"><div class="p-3 ${catInfo.bg} flex items-center gap-2 border-b border-slate-100"><i class="fa-solid ${catInfo.icon} ${catInfo.color}"></i><h4 class="font-bold text-sm text-slate-700">${catInfo.label}</h4></div><div>${rows}</div></div>`;
