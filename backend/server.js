@@ -1,8 +1,7 @@
 const express = require('express');
-const mysql = require('mysql2/promise'); // Usando a versão promise para async/await
+const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -10,7 +9,7 @@ const app = express();
 app.use(express.json({ limit: '50mb' })); 
 app.use(cors());
 
-// --- CONEXÃO BANCO (Pool de Conexões) ---
+// --- CONEXÃO BANCO ---
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -35,7 +34,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// --- ROTAS DE AUTH (Login/Register/Reset) ---
+// --- ROTAS DE AUTH ---
 app.post('/auth/register', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -60,11 +59,11 @@ app.post('/auth/login', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- ROTAS DE DADOS (CORE DO SISTEMA) ---
+// --- ROTAS DE DADOS ---
 
-// 1. SALVAR PLANO (Admin)
+// 1. SALVAR PLANO
 app.post('/auth/save-plan', authenticateToken, async (req, res) => {
-    const { name, data, is_active } = req.body; // data contém { library, planner, themes }
+    const { name, data, is_active } = req.body;
     const userId = req.user.id;
     
     if (!data || !data.library) return res.status(400).json({ error: "Dados incompletos" });
@@ -73,52 +72,38 @@ app.post('/auth/save-plan', authenticateToken, async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        // A. Se for para ativar, desativa os anteriores
         if (is_active) {
             await connection.query('UPDATE plans SET is_active = 0 WHERE user_id = ?', [userId]);
         }
 
-        // B. Salva/Atualiza o Plano na tabela 'plans'
-        // Verifica se já existe um plano com esse nome para atualizar, ou cria novo
         const [existing] = await connection.query('SELECT id FROM plans WHERE user_id = ? AND plan_name = ?', [userId, name]);
-        
         const jsonString = JSON.stringify(data);
 
         if (existing.length > 0) {
-            await connection.query('UPDATE plans SET plan_data = ?, is_active = ? WHERE id = ?', 
+            await connection.query('UPDATE plans SETQA plan_data = ?, is_active = ? WHERE id = ?', 
                 [jsonString, is_active, existing[0].id]);
         } else {
             await connection.query('INSERT INTO plans (user_id, plan_name, plan_data, is_active) VALUES (?, ?, ?, ?)', 
                 [userId, name, jsonString, is_active]);
         }
 
-        // C. Salva as Receitas individualmente no Estoque ('recipes')
-        // Isso permite reutilizar receitas em outros planos
+        // Salva receitas individualmente para reaproveitamento
         for (const rec of data.library) {
-            const sqlRecipe = `
-                INSERT INTO recipes (recipe_id, user_id, name, category, full_data)
-                VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                name = VALUES(name), category = VALUES(category), full_data = VALUES(full_data)
-            `;
-            await connection.query(sqlRecipe, [
-                rec.id, userId, rec.name, rec.cat, JSON.stringify(rec)
-            ]);
+            const sqlRecipe = `INSERT INTO recipes (recipe_id, user_id, name, category, full_data) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = VALUES(name), category = VALUES(category), full_data = VALUES(full_data)`;
+            await connection.query(sqlRecipe, [rec.id, userId, rec.name, rec.cat, JSON.stringify(rec)]);
         }
 
         await connection.commit();
-        res.json({ success: true, msg: "Plano e Receitas salvos com sucesso!" });
-
+        res.json({ success: true, msg: "Salvo com sucesso!" });
     } catch (error) {
         await connection.rollback();
-        console.error(error);
-        res.status(500).json({ error: "Erro ao salvar no banco." });
+        res.status(500).json({ error: "Erro ao salvar." });
     } finally {
         connection.release();
     }
 });
 
-// 2. LISTAR PLANOS SALVOS (Admin)
+// 2. LISTAR PLANOS
 app.get('/auth/get-plans', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT id, plan_name, is_active, updated_at FROM plans WHERE user_id = ? ORDER BY updated_at DESC', [req.user.id]);
@@ -126,34 +111,31 @@ app.get('/auth/get-plans', authenticateToken, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. CARREGAR PLANO PARA EDIÇÃO (Admin)
+// 3. CARREGAR PLANO
 app.get('/auth/get-plan/:id', authenticateToken, async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT plan_data FROM plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
         if (rows.length === 0) return res.status(404).json({ msg: "Não encontrado" });
-        
-        let plan = rows[0].plan_data;
-        if (typeof plan === 'string') plan = JSON.parse(plan);
-        res.json(plan);
+        res.json(JSON.parse(rows[0].plan_data));
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 4. CARREGAR PLANO ATIVO (App Mobile)
+// 4. EXCLUIR PLANO (NOVO)
+app.delete('/auth/delete-plan/:id', authenticateToken, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        res.json({ success: true, msg: "Plano excluído." });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 5. CARREGAR PLANO ATIVO (App)
 app.get('/auth/get-active-plan', authenticateToken, async (req, res) => {
     try {
-        // Pega o plano marcado como is_active = 1
         const [rows] = await pool.query('SELECT plan_data FROM plans WHERE user_id = ? AND is_active = 1 ORDER BY updated_at DESC LIMIT 1', [req.user.id]);
-        
-        if (rows.length > 0) {
-            let plan = rows[0].plan_data;
-            if (typeof plan === 'string') plan = JSON.parse(plan);
-            res.json(plan);
-        } else {
-            // Retorna vazio mas com estrutura válida para não quebrar o App
-            res.status(404).json({ msg: "Nenhum plano ativo." });
-        }
+        if (rows.length > 0) res.json(JSON.parse(rows[0].plan_data));
+        else res.status(404).json({ msg: "Nenhum plano ativo." });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`🔥 Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`🔥 Server na porta ${PORT}`));
