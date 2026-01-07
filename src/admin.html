@@ -2,126 +2,140 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Diet Admin | Gestor vFinal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DietCMS | Painel do Nutricionista</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+
     <script>
-        const API_BASE = '/auth'; 
+        const API_BASE = '/auth'; // Endpoint base
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'login.html';
+        
+        // Se não tiver token, manda pro login
+        if (!token) window.location.href = 'index.html';
 
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
-
-        function toggleSidebar() {
-            const sb = document.getElementById('sidebar');
-            const ov = document.getElementById('mobile-overlay');
-            if (sb.classList.contains('-translate-x-full')) {
-                sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden');
-            } else {
-                sb.classList.add('-translate-x-full'); ov.classList.add('hidden');
-            }
+            window.location.href = 'index.html';
         }
     </script>
-
-    <style type="text/tailwindcss">
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; height: 100dvh; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .fade-in { animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.99); } to { opacity: 1; transform: scale(1); } }
-        .mobile-overlay { background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @media (max-width: 768px) { input, select, textarea { font-size: 16px !important; } }
-    </style>
 </head>
-<body class="flex overflow-hidden text-slate-800 bg-slate-50">
+<body class="flex text-slate-800">
 
-    <div id="mobile-overlay" onclick="toggleSidebar()" class="fixed inset-0 mobile-overlay z-20 hidden md:hidden transition-opacity"></div>
-
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 shadow-xl md:shadow-sm transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-            <div class="flex items-center gap-3 text-slate-800 font-bold text-xl tracking-tight">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-blue-200 shadow-lg"><i class="fa-solid fa-layer-group"></i></div>
-                DietCMS
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col h-full shadow-lg z-20">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-blue-200 shadow-lg">
+                <i class="fa-solid fa-layer-group text-lg"></i>
             </div>
-            <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <div>
+                <h1 class="font-bold text-xl tracking-tight text-slate-900">DietCMS</h1>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Versão Admin</p>
+            </div>
         </div>
         
-        <div class="px-6 py-4 border-b border-slate-50">
-            <p class="text-xs text-slate-400 font-medium mb-1">Logado como:</p>
-            <p class="text-sm font-bold text-slate-800 truncate mb-2" id="user-display">Admin</p>
-            <a href="tutorial.html" class="flex items-center justify-center w-full px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 rounded-md hover:bg-blue-100 transition-colors">
-                <i class="fa-solid fa-circle-question mr-2"></i> Ver Tutorial
-            </a>
+        <div class="p-6 border-b border-slate-50">
+            <p class="text-xs text-slate-400 font-bold uppercase mb-1">Logado como</p>
+            <p class="font-bold text-slate-800 truncate" id="user-display">Nutricionista</p>
         </div>
 
-        <nav class="flex-1 p-4 overflow-y-auto space-y-1">
-            <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3 mt-2">GERENCIAMENTO</p>
-            <button onclick="switchView('presets')" id="nav-presets" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-cloud w-5 text-slate-400"></i> Planos Salvos</button>
-            <button onclick="switchView('planner')" id="nav-planner" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-calendar-days w-5 text-slate-400"></i> Editor Atual</button>
-            <button onclick="switchView('library')" id="nav-library" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"><i class="fa-solid fa-book-open w-5 text-slate-400"></i> Biblioteca</button>
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+            <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 mt-2">Navegação</p>
             
-            <div class="mt-6 pt-6 border-t border-slate-100">
-                <p class="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3">INTELIGÊNCIA ARTIFICIAL</p>
-                <button onclick="openPromptGen()" class="flex items-center w-full px-4 py-3 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors mb-2 border border-indigo-100 shadow-sm">
-                    <i class="fa-solid fa-wand-magic-sparkles w-5"></i> Gerador de Prompts
+            <button onclick="switchView('presets')" id="nav-presets" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+                <i class="fa-solid fa-cloud w-6"></i> Planos Salvos
+            </button>
+            
+            <button onclick="switchView('planner')" id="nav-planner" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+                <i class="fa-solid fa-calendar-days w-6"></i> Editor Atual
+            </button>
+            
+            <button onclick="switchView('library')" id="nav-library" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+                <i class="fa-solid fa-book-open w-6"></i> Estoque Receitas
+            </button>
+
+            <div class="mt-8 pt-6 border-t border-slate-100">
+                <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Ferramentas IA</p>
+                <button onclick="openPromptGen()" class="flex items-center w-full px-4 py-3 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-100 transition-colors">
+                    <i class="fa-solid fa-wand-magic-sparkles w-6"></i> Gerador IA
                 </button>
             </div>
-
-            <div class="mt-4 pt-4 border-t border-slate-100">
-                <a href="app.html" target="_self" class="flex items-center w-full px-4 py-3 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><i class="fa-solid fa-external-link-alt w-5"></i> Ver App Online</a>
-            </div>
-
-            <button onclick="logout()" class="flex items-center w-full px-4 py-3 mt-4 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100">
-                <i class="fa-solid fa-right-from-bracket w-5"></i> Sair
-            </button>
         </nav>
+
+        <div class="p-4 border-t border-slate-100">
+            <button onclick="logout()" class="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Sair
+            </button>
+        </div>
     </aside>
 
-    <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative md:ml-64 transition-all duration-300 h-full">
-        <div class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20 shadow-sm flex-shrink-0">
-            <span class="font-bold text-lg text-slate-800 flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-600"></i> DietCMS</span>
-            <button onclick="toggleSidebar()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"><i class="fa-solid fa-bars text-xl"></i></button>
-        </div>
-
-        <div id="view-presets" class="flex-1 flex flex-col h-full fade-in overflow-hidden">
-            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
-                <div><h2 class="text-xl font-bold text-slate-800">Planos na Nuvem</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Gerencie seus planejamentos salvos.</p></div>
-                <div class="flex gap-2 w-full md:w-auto">
-                    <button onclick="openImportModal('plan')" class="flex-1 md:flex-none justify-center bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 cursor-pointer flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"><i class="fa-solid fa-paste text-blue-600"></i> Importar IA</button>
-                    <button onclick="saveToCloud()" class="flex-1 md:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg transition-all flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem</button>
+    <main class="flex-1 bg-slate-50 relative overflow-hidden flex flex-col">
+        
+        <div id="view-presets" class="view-section flex-col h-full flex">
+            <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-sm z-10">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Planos na Nuvem</h2>
+                    <p class="text-sm text-slate-500">Gerencie e ative dietas para o aplicativo.</p>
                 </div>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-32">
+                <div class="flex gap-3">
+                    <button onclick="saveToCloud()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Salvar / Publicar
+                    </button>
+                </div>
+            </header>
+            
+            <div class="flex-1 overflow-y-auto p-8">
                 <div id="loading-plans" class="hidden flex justify-center py-10"><div class="loader"></div></div>
-                <div id="presets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div id="presets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+                
                 <div id="empty-presets" class="hidden flex flex-col items-center justify-center h-96 text-slate-400">
-                    <i class="fa-solid fa-cloud text-4xl mb-3 text-slate-300"></i>
-                    <p class="font-medium text-center">Nenhum plano salvo na nuvem.<br>Crie um e clique em salvar.</p>
+                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-cloud text-3xl text-slate-300"></i>
+                    </div>
+                    <p class="font-medium text-lg">Nenhum plano salvo</p>
+                    <p class="text-sm">Use o Editor para criar e salvar seu primeiro plano.</p>
                 </div>
             </div>
         </div>
 
-        <div id="view-planner" class="hidden flex-1 flex flex-col h-full fade-in overflow-hidden">
-            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
-                <div><h2 class="text-xl font-bold text-slate-800">Editor Atual</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Você está editando este rascunho.</p></div>
-                <div class="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 self-start md:self-auto"><i class="fa-solid fa-info-circle text-blue-500"></i> Clique nos slots para adicionar</div>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-40">
+        <div id="view-planner" class="view-section hidden flex-col h-full flex">
+            <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-sm z-10">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Editor Visual</h2>
+                    <p class="text-sm text-slate-500">Arraste ou clique para definir as refeições das 4 semanas.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openImportModal('plan')" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <i class="fa-solid fa-file-import mr-2"></i> Importar JSON
+                    </button>
+                    <button onclick="saveToCloud()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-green-200 transition-all">
+                        <i class="fa-solid fa-save mr-2"></i> Salvar Alterações
+                    </button>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-8 pb-32">
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse min-w-[800px]">
+                        <table class="w-full border-collapse min-w-[900px]">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-left">
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase w-24 text-center border-r border-slate-200">Semana</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase w-28 text-center border-r border-slate-200">Semana</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-mug-hot mr-2 text-yellow-500"></i>Café</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-utensils mr-2 text-blue-500"></i>Almoço</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase w-1/4"><i class="fa-solid fa-bolt mr-2 text-orange-500"></i>Lanche</th>
@@ -132,82 +146,286 @@
                         </table>
                     </div>
                 </div>
-                
-                <h3 class="text-sm font-bold text-slate-700 mt-8 mb-4">Títulos das Semanas</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 1</label><input type="text" id="theme-w1" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 2</label><input type="text" id="theme-w2" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 3</label><input type="text" id="theme-w3" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm"><label class="text-[10px] font-bold text-slate-400 uppercase">Semana 4</label><input type="text" id="theme-w4" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500" onchange="saveThemes()"></div>
+
+                <div class="mb-8">
+                    <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-tag text-blue-500"></i> Temas Semanais
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 1</label>
+                            <input type="text" id="theme-w1" placeholder="Ex: Adaptação" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 2</label>
+                            <input type="text" id="theme-w2" placeholder="Ex: Foco Proteico" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 3</label>
+                            <input type="text" id="theme-w3" placeholder="Ex: Low Carb" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 4</label>
+                            <input type="text" id="theme-w4" placeholder="Ex: Manutenção" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="view-library" class="hidden flex-1 flex flex-col h-full fade-in overflow-hidden">
-            <div class="bg-white shadow-sm z-10 border-b border-slate-200 p-4 md:px-8 md:h-20 flex flex-col md:flex-row md:items-center justify-between gap-4 flex-shrink-0">
-                <div><h2 class="text-xl font-bold text-slate-800">Estoque de Receitas</h2><p class="text-xs text-slate-500 mt-0.5 hidden md:block">Banco de dados de refeições para usar nos planos.</p></div>
-                <div class="flex gap-2 w-full md:w-auto">
-                    <button onclick="openImportModal('recipe')" class="flex-1 md:flex-none justify-center bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 cursor-pointer flex items-center gap-2 transition-all shadow-sm whitespace-nowrap"><i class="fa-solid fa-paste text-blue-500"></i> Importar Pack</button>
-                    <button onclick="openRecipeModal()" class="flex-1 md:flex-none justify-center bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2 whitespace-nowrap"><i class="fa-solid fa-plus"></i> Nova Receita</button>
+        <div id="view-library" class="view-section hidden flex-col h-full flex">
+            <header class="bg-white border-b border-slate-200 px-8 py-5 flex justify-between items-center shadow-sm z-10">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800">Estoque de Receitas</h2>
+                    <p class="text-sm text-slate-500">Sua biblioteca pessoal de refeições.</p>
                 </div>
-            </div>
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-32">
+                <div class="flex gap-2">
+                    <button onclick="openImportModal('recipe')" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <i class="fa-solid fa-file-import mr-2"></i> Importar Pack
+                    </button>
+                    <button onclick="openRecipeModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Nova Receita
+                    </button>
+                </div>
+            </header>
+            
+            <div class="flex-1 overflow-y-auto p-8 pb-32">
                 <div id="recipe-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
-                <div id="empty-library" class="hidden flex flex-col items-center justify-center h-96 text-slate-400"><i class="fa-solid fa-basket-shopping text-4xl mb-3 text-slate-300"></i><p class="font-medium text-center">Nenhuma receita cadastrada.<br>Importe ou crie manualmente.</p></div>
+                
+                <div id="empty-library" class="hidden flex flex-col items-center justify-center h-96 text-slate-400">
+                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-basket-shopping text-3xl text-slate-300"></i>
+                    </div>
+                    <p class="font-medium">Nenhuma receita cadastrada.</p>
+                </div>
             </div>
         </div>
     </main>
 
-    <div id="prompt-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"><div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50"><h3 class="font-bold text-lg text-indigo-900 flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerador de Prompts</h3><button onclick="closePromptGen()" class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="flex-1 overflow-y-auto p-6 space-y-4"><div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">O que você quer criar?</label><select id="gen-type" onchange="toggleGenInputs()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500"><option value="plan">Plano Completo (4 Semanas)</option><option value="recipe">Pacote de Receitas</option></select></div><div id="gen-qty-container" class="hidden"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Quantidade de Receitas</label><input type="number" id="gen-qty" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold outline-none focus:border-indigo-500" value="5" placeholder="Ex: 5"></div><div><label class="block text-xs font-bold text-slate-500 uppercase mb-1" id="gen-input-label">Seu Perfil / Detalhes</label><textarea id="gen-input" class="w-full h-32 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none focus:border-indigo-500" placeholder="Ex: Mulher, 35 anos, objetivo emagrecimento. Prefiro frango e peixe. Evitar glúten."></textarea></div><button onclick="generatePromptText()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"><i class="fa-solid fa-gear"></i> Gerar Prompt</button><div class="border-t border-slate-100 pt-4"><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Resultado (Copie e cole na IA)</label><textarea id="gen-output" class="w-full h-32 bg-slate-900 text-green-400 rounded-lg p-3 text-xs font-mono resize-none" readonly></textarea></div></div><div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2"><button onclick="closePromptGen()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Fechar</button><button onclick="copyPromptText()" class="px-6 py-2 text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg shadow-lg flex items-center gap-2"><i class="fa-regular fa-copy"></i> Copiar</button></div></div></div>
-    
-    <div id="import-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-full md:h-auto md:max-h-[80vh] flex flex-col overflow-hidden border border-slate-200"><div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white"><div><h3 class="font-bold text-lg text-slate-800" id="import-title">Importar</h3><p class="text-xs text-slate-500">Cole o JSON gerado pela IA.</p></div><button onclick="closeImportModal()" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button></div><div class="flex-1 p-0 overflow-hidden relative"><textarea id="import-text" class="w-full h-full p-4 bg-slate-50 text-xs font-mono resize-none focus:outline-none focus:bg-white transition-colors" placeholder='Cole aqui...'></textarea></div><div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2"><button onclick="closeImportModal()" class="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-lg">Cancelar</button><button onclick="processImport()" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-lg flex items-center gap-2"><i class="fa-solid fa-bolt"></i> Processar</button></div></div></div>
+    <div id="prompt-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-slate-200 max-h-[90vh]">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50">
+                <h3 class="font-bold text-lg text-indigo-900 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gerador de Prompts
+                </h3>
+                <button onclick="closePromptGen()" class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">O que você quer criar?</label>
+                    <select id="gen-type" onchange="toggleGenInputs()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold text-slate-700 outline-none focus:border-indigo-500 transition-colors">
+                        <option value="plan">Plano Completo (4 Semanas)</option>
+                        <option value="recipe">Pacote de Receitas Avulsas</option>
+                    </select>
+                </div>
+                <div id="gen-qty-container" class="hidden">
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Quantidade</label>
+                    <input type="number" id="gen-qty" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold outline-none focus:border-indigo-500" value="5">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1" id="gen-input-label">Perfil do Paciente</label>
+                    <textarea id="gen-input" class="w-full h-24 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none focus:border-indigo-500 transition-colors" placeholder="Ex: Homem, 30 anos, hipertrofia. Gosta de frango, batata doce e ovos."></textarea>
+                </div>
+                <button onclick="generatePromptText()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-200 transition-all">
+                    Gerar Prompt
+                </button>
+                <div class="border-t border-slate-100 pt-4">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Resultado (Copie e cole na IA)</label>
+                    <textarea id="gen-output" class="w-full h-32 bg-slate-900 text-green-400 rounded-lg p-3 text-xs font-mono resize-none" readonly></textarea>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2">
+                <button onclick="copyPromptText()" class="px-6 py-2 text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg shadow-lg flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Copiar
+                </button>
+            </div>
+        </div>
+    </div>
 
-    <div id="recipe-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm transition-opacity p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden border border-slate-200"><div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white"><h3 class="font-bold text-lg text-slate-800">Editor de Receita</h3><button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600"><i class="fa-solid fa-xmark"></i></button></div><div class="flex-1 overflow-y-auto p-4 space-y-6 md:p-8 bg-slate-50"><input type="hidden" id="edit-id"><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="grid grid-cols-1 md:grid-cols-12 gap-4"><div class="md:col-span-8"><input type="text" id="rec-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-lg font-bold" placeholder="Nome do Prato"></div><div class="grid grid-cols-2 gap-2 md:col-span-4 md:flex md:gap-4"><div class="w-full"><select id="rec-cat" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm"><option value="almoco">Almoço</option><option value="jantar">Jantar</option><option value="cafe">Café</option><option value="lanche">Lanche</option></select></div><div class="w-full"><select id="rec-icon" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm font-mono"><option value="fa-utensils">🍴 Padrão</option><option value="fa-drumstick-bite">🍗 Carne</option><option value="fa-leaf">🥬 Salada</option><option value="fa-mug-hot">☕ Café</option><option value="fa-bolt">⚡ Lanche</option></select></div></div></div></div><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Ingredientes (g/ml)</h4><button onclick="addRecLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded">+ Item</button></div><div id="rec-ingredients" class="space-y-2"></div></div><div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200"><div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Passos</h4><button onclick="addStepLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded">+ Passo</button></div><div id="rec-steps" class="space-y-3"></div></div></div><div class="p-4 border-t border-slate-100 bg-white flex justify-between items-center"><button onclick="closeModal()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100">Cancelar</button><button onclick="saveRecipeToLibrary()" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg">Salvar Receita</button></div></div></div>
+    <div id="import-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-slate-200 h-[600px]">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div>
+                    <h3 class="font-bold text-lg text-slate-800" id="import-title">Importar</h3>
+                    <p class="text-xs text-slate-500">Cole o JSON gerado pela IA.</p>
+                </div>
+                <button onclick="closeImportModal()" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="flex-1 p-0 relative">
+                <textarea id="import-text" class="w-full h-full p-4 bg-slate-50 text-xs font-mono resize-none focus:outline-none focus:bg-white transition-colors" placeholder="Cole o código JSON aqui..."></textarea>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2">
+                <button onclick="processImport()" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-lg">
+                    Processar JSON
+                </button>
+            </div>
+        </div>
+    </div>
 
-    <div id="picker-modal" class="fixed inset-0 bg-slate-900/40 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4"><div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="p-4 bg-slate-800 text-white flex justify-between items-center border-b border-slate-700"><h3 class="font-bold text-sm">Escolher Receita</h3><button onclick="closePicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div><div class="p-3 bg-slate-50 border-b border-slate-200"><input type="text" id="picker-search" placeholder="Buscar..." class="w-full text-sm pl-4 py-2 rounded-lg border" onkeyup="renderPickerList()"></div><div id="picker-list" class="max-h-80 overflow-y-auto p-2 bg-white"></div></div></div>
+    <div id="recipe-modal" class="fixed inset-0 bg-slate-900/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+                <h3 class="font-bold text-lg text-slate-800">Editor de Receita</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
+                <input type="hidden" id="edit-id">
+                
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div class="md:col-span-8">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Nome do Prato</label>
+                            <input type="text" id="rec-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-lg font-bold outline-none focus:border-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Categoria</label>
+                            <select id="rec-cat" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm font-medium outline-none focus:border-blue-500">
+                                <option value="cafe">Café</option>
+                                <option value="almoco">Almoço</option>
+                                <option value="lanche">Lanche</option>
+                                <option value="jantar">Jantar</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Ícone</label>
+                            <select id="rec-icon" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-3.5 text-sm font-mono outline-none focus:border-blue-500">
+                                <option value="fa-utensils">🍴 Padrão</option>
+                                <option value="fa-mug-hot">☕ Café</option>
+                                <option value="fa-drumstick-bite">🍗 Carne</option>
+                                <option value="fa-leaf">🥬 Salada</option>
+                                <option value="fa-bolt">⚡ Energia</option>
+                                <option value="fa-moon">🌙 Noite</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                            <h4 class="font-bold text-slate-700 text-sm">Ingredientes</h4>
+                            <button onclick="addRecLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded hover:bg-blue-100">+ Item</button>
+                        </div>
+                        <div id="rec-ingredients" class="space-y-2"></div>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                            <h4 class="font-bold text-slate-700 text-sm">Modo de Preparo</h4>
+                            <button onclick="addStepLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1.5 rounded hover:bg-blue-100">+ Passo</button>
+                        </div>
+                        <div id="rec-steps" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors">Cancelar</button>
+                <button onclick="saveRecipeToLibrary()" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg transition-all">Salvar Receita</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="picker-modal" class="fixed inset-0 bg-slate-900/40 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4 fade-in">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div class="p-4 bg-slate-800 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm">Selecionar Receita</h3>
+                <button onclick="closePicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-3 bg-slate-50 border-b border-slate-200">
+                <input type="text" id="picker-search" placeholder="Buscar por nome..." class="w-full text-sm pl-4 py-2 rounded-lg border border-slate-300 focus:border-blue-500 outline-none" onkeyup="renderPickerList()">
+            </div>
+            <div id="picker-list" class="max-h-80 overflow-y-auto p-2 bg-white"></div>
+        </div>
+    </div>
 
     <script>
+        // --- CONSTANTES E ESTADO ---
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if(storedUser && storedUser.name) document.getElementById('user-display').innerText = storedUser.name;
 
+        // Templates de Prompt
         const TEMPLATE_PLAN = `Atue como um Nutricionista Sênior. Objetivo: Gerar um JSON válido com um plano mensal (4 semanas). SEU PERFIL: [PERFIL] REGRAS RIGOROSAS: 1. "ingredients": Use a Quantidade DIÁRIA ("q_daily") APENAS em 'g' (gramas) ou 'ml' (mililitros). NUNCA use 'kg' ou 'l'. 2. Categorias: "cafe", "almoco", "lanche", "jantar". 3. Mercado: "carnes", "horti", "mercearia", "outros". ESTRUTURA JSON (Responda APENAS ISSO): { "library": [{ "id": "rec_01", "name": "Nome", "cat": "almoco", "icon": "fa-drumstick-bite", "ingredients": [{"n": "Item", "q_daily": 200, "u": "g", "cat": "carnes"}], "steps": ["Passo 1"] }], "planner": { "1": { "cafe": "rec_01" ... } }, "themes": { "1": "Nome..." } }`;
         const TEMPLATE_RECIPE = `Atue como Nutricionista. Gere um JSON Array com [QTD] receitas do tipo: [PERFIL]. REGRAS RIGOROSAS: Quantidades DIÁRIAS (q_daily) SEMPRE em 'g' (gramas) ou 'ml'. NUNCA use 'kg'. Categorias: "cafe", "almoco", "lanche", "jantar". ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot", "ingredients": [{"n": "Item", "q_daily": 200, "u": "g", "cat": "mercearia"}], "steps": ["Passo 1"] }]`;
 
+        // Estado Global
         let library = [];
         let planner = { 1: {}, 2: {}, 3: {}, 4: {} };
         let themes = {};
         let pickerContext = null; 
         let currentImportType = ''; 
 
+        // --- INICIALIZAÇÃO ---
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const action = urlParams.get('action');
-            const view = urlParams.get('view');
-            
             loadPlansFromDB();
-
-            if (action === 'gen') { 
-                openPromptGen(); 
-                window.history.replaceState({}, document.title, "admin.html"); 
-                switchView('presets'); 
-            } 
-            else if (view === 'library') { switchView('library'); } 
-            else { switchView('presets'); }
+            switchView('presets');
         };
-        
+
+        // --- NAVEGAÇÃO ---
+        function switchView(viewName) {
+            // Esconde todas as views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            // Mostra a selecionada
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            
+            // Atualiza botões da sidebar
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isActive = btn.id === `nav-${viewName}`;
+                if (isActive) {
+                    btn.className = "nav-btn flex items-center w-full px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg shadow-sm mb-1 border border-blue-100";
+                    btn.querySelector('i').classList.add('text-blue-600');
+                } else {
+                    btn.className = "nav-btn flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1";
+                    btn.querySelector('i').classList.remove('text-blue-600');
+                }
+            });
+        }
+
+        // --- API: CARREGAR E SALVAR ---
         async function loadPlansFromDB() {
-            document.getElementById('loading-plans').classList.remove('hidden');
-            document.getElementById('presets-grid').innerHTML = '';
+            const loading = document.getElementById('loading-plans');
+            const grid = document.getElementById('presets-grid');
+            const empty = document.getElementById('empty-presets');
+            
+            loading.classList.remove('hidden');
+            grid.innerHTML = '';
+            empty.classList.add('hidden');
+
             try {
                 const res = await fetch(`${API_BASE}/get-plans`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if(!res.ok) throw new Error("Erro ao buscar planos");
+                if(!res.ok) throw new Error("Erro na API");
                 const plans = await res.json();
-                renderPresetsGrid(plans);
+                
+                if (plans.length === 0) {
+                    empty.classList.remove('hidden');
+                } else {
+                    plans.forEach(p => {
+                        const date = new Date(p.updated_at).toLocaleDateString('pt-BR');
+                        const activeBadge = p.is_active 
+                            ? `<span class="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full border border-green-200 shadow-sm flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> ATIVO NO APP</span>` 
+                            : '';
+                        
+                        grid.innerHTML += `
+                            <div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-xl transition-all relative group cursor-pointer" onclick="loadPlan(${p.id})">
+                                ${activeBadge}
+                                <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-file-contract"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-lg mb-1 truncate">${p.plan_name}</h3>
+                                <p class="text-xs text-slate-400 mb-6 font-medium">Atualizado em: ${date}</p>
+                                <button class="w-full py-2.5 border border-slate-200 bg-slate-50 rounded-lg text-sm font-bold text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+                                    Editar Plano
+                                </button>
+                            </div>
+                        `;
+                    });
+                }
             } catch (error) {
                 console.error(error);
-                document.getElementById('presets-grid').innerHTML = '<p class="text-red-500 text-center col-span-3">Erro de conexão com a Nuvem.</p>';
+                grid.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">Erro ao carregar planos. Verifique a conexão.</div>`;
             } finally {
-                document.getElementById('loading-plans').classList.add('hidden');
+                loading.classList.add('hidden');
             }
         }
 
@@ -215,71 +433,437 @@
             try {
                 const res = await fetch(`${API_BASE}/get-plan/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 if(!res.ok) throw new Error("Erro ao carregar");
+                
                 const data = await res.json();
+                // Popula o estado global
                 library = data.library || [];
                 planner = data.planner || {};
                 themes = data.themes || {};
-                renderLibrary(); renderPlanner(); loadThemes(); switchView('planner');
-            } catch (error) { alert("Erro ao abrir este plano."); }
+                
+                // Atualiza a UI
+                renderLibrary();
+                renderPlanner();
+                loadThemes();
+                
+                // Troca para a view de edição
+                switchView('planner');
+            } catch (error) {
+                alert("Erro ao abrir este plano.");
+            }
         }
 
         async function saveToCloud() {
-            if(Object.keys(planner[1]).length === 0 && library.length === 0) return alert("O plano está vazio!");
-            const name = prompt("Dê um nome para este plano:");
+            // Validação simples
+            if(Object.keys(planner[1]).length === 0 && library.length === 0) {
+                return alert("O plano está vazio! Adicione receitas antes de salvar.");
+            }
+
+            const name = prompt("Dê um nome para este plano (ex: Hipertrofia Janeiro):");
             if(!name) return;
+
             const makeActive = confirm("Deseja ativar este plano para aparecer no App agora?");
-            const payload = { name: name, data: { library, planner, themes }, is_active: makeActive };
             
-            const btn = document.querySelector('button[onclick="saveToCloud()"]');
-            const originalText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; btn.disabled = true;
+            // Payload correto conforme novo backend
+            const payload = { 
+                name: name, 
+                data: { library, planner, themes }, 
+                is_active: makeActive 
+            };
+            
+            // Feedback visual no botão
+            const btn = document.querySelector('button[onclick="saveToCloud()"]'); 
+            // Nota: pega o primeiro botão encontrado, idealmente use ID se tiver conflito
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+            btn.disabled = true;
 
             try {
-                const res = await fetch(`${API_BASE}/save-plan`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
-                if(res.ok) { alert("✅ Plano Salvo na Nuvem com sucesso!"); loadPlansFromDB(); } else { alert("Erro ao salvar."); }
-            } catch(e) { alert("Erro de conexão."); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+                const res = await fetch(`${API_BASE}/save-plan`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                const data = await res.json();
+
+                if(res.ok) {
+                    alert("✅ " + data.msg);
+                    loadPlansFromDB(); // Recarrega a lista
+                    if(document.getElementById('view-presets').classList.contains('hidden')) {
+                        // Se não estiver na tela de presets, não faz nada, ou pode redirecionar
+                    }
+                } else {
+                    alert("Erro ao salvar: " + (data.error || data.msg));
+                }
+            } catch(e) {
+                console.error(e);
+                alert("Erro de conexão com o servidor.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
-        function renderPresetsGrid(plans) {
-            const grid = document.getElementById('presets-grid');
-            const empty = document.getElementById('empty-presets');
-            grid.innerHTML = '';
-            if (!plans || plans.length === 0) { empty.classList.remove('hidden'); return; }
-            empty.classList.add('hidden');
+        // --- FUNÇÕES DE IMPORTAÇÃO E IA ---
+        function toggleGenInputs() {
+            const type = document.getElementById('gen-type').value;
+            const qtyDiv = document.getElementById('gen-qty-container');
+            const label = document.getElementById('gen-input-label');
+            const ph = document.getElementById('gen-input');
 
-            plans.forEach(p => {
-                const date = new Date(p.updated_at).toLocaleDateString();
-                const activeBadge = p.is_active ? `<span class="absolute top-3 right-3 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full border border-green-200 shadow-sm"><i class="fa-solid fa-check-circle"></i> ATIVO</span>` : '';
-                grid.innerHTML += `<div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-lg transition-all relative group cursor-pointer" onclick="loadPlan(${p.id})">${activeBadge}<div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors"><i class="fa-solid fa-calendar-check"></i></div><h3 class="font-bold text-slate-800 text-lg mb-1">${p.plan_name}</h3><p class="text-xs text-slate-400 mb-4">Atualizado: ${date}</p><button class="w-full py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors">Abrir Editor</button></div>`;
+            if (type === 'recipe') {
+                qtyDiv.classList.remove('hidden');
+                label.innerText = 'Tipos de Receita';
+                ph.placeholder = "Ex: Café da manhã low carb, Jantar leve...";
+            } else {
+                qtyDiv.classList.add('hidden');
+                label.innerText = 'Perfil do Paciente';
+                ph.placeholder = "Ex: Mulher, 35 anos, objetivo emagrecimento...";
+            }
+        }
+
+        function generatePromptText() {
+            const type = document.getElementById('gen-type').value;
+            const inputVal = document.getElementById('gen-input').value;
+            if(!inputVal.trim()) return alert("Preencha as informações.");
+            
+            let final = "";
+            if (type === 'plan') {
+                final = TEMPLATE_PLAN.replace('[PERFIL]', inputVal);
+            } else {
+                const qty = document.getElementById('gen-qty').value || 5;
+                final = TEMPLATE_RECIPE.replace('[QTD]', qty).replace('[PERFIL]', inputVal);
+            }
+            document.getElementById('gen-output').value = final;
+        }
+
+        function copyPromptText() {
+            const txt = document.getElementById('gen-output');
+            txt.select();
+            navigator.clipboard.writeText(txt.value);
+            alert("Prompt copiado!");
+        }
+
+        function openPromptGen() { document.getElementById('prompt-modal').classList.remove('hidden'); toggleGenInputs(); }
+        function closePromptGen() { document.getElementById('prompt-modal').classList.add('hidden'); }
+        
+        function openImportModal(type) {
+            currentImportType = type;
+            document.getElementById('import-title').innerText = type === 'plan' ? 'Importar Plano Completo' : 'Importar Receitas';
+            document.getElementById('import-text').value = '';
+            document.getElementById('import-modal').classList.remove('hidden');
+        }
+        function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); }
+
+        function processImport() {
+            let text = document.getElementById('import-text').value.trim();
+            if(!text) return alert("Cole o código JSON.");
+            
+            // Tenta limpar markdown ```json ... ```
+            if (!text.startsWith('{') && !text.startsWith('[')) {
+                const startIdx = text.search(/[\{\[]/);
+                if (startIdx !== -1) {
+                    text = text.substring(startIdx);
+                    const lastIdx = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']'));
+                    if (lastIdx !== -1) text = text.substring(0, lastIdx + 1);
+                }
+            }
+            
+            // Correção para JSON solto de library
+            if (text.startsWith('"library"')) text = '{' + text + '}';
+
+            try {
+                const data = JSON.parse(text);
+
+                if (currentImportType === 'plan') {
+                    if (data.library && data.planner) {
+                        // Merge inteligente: Adiciona receitas novas sem duplicar ID exato
+                        data.library.forEach(r => {
+                            if(!library.find(x => x.id === r.id)) library.push(r);
+                        });
+                        planner = data.planner;
+                        themes = data.themes || {};
+                        renderLibrary();
+                        renderPlanner();
+                        loadThemes();
+                        closeImportModal();
+                        alert("Plano importado com sucesso!");
+                        switchView('planner');
+                    } else {
+                        throw new Error("JSON não parece ser um plano completo (falta library ou planner).");
+                    }
+                } else {
+                    // Importar Receitas
+                    let list = Array.isArray(data) ? data : (data.library || []);
+                    if(!list.length) throw new Error("Nenhuma receita encontrada no JSON.");
+                    
+                    let count = 0;
+                    list.forEach(n => {
+                        const i = library.findIndex(x => x.id === n.id);
+                        if(i >= 0) library[i] = n; // Atualiza
+                        else library.push(n); // Insere
+                        count++;
+                    });
+                    
+                    renderLibrary();
+                    alert(`${count} receitas importadas!`);
+                    closeImportModal();
+                    switchView('library');
+                }
+            } catch(e) {
+                alert("Erro ao processar JSON: " + e.message);
+            }
+        }
+
+        // --- RENDERIZAÇÃO E UI ---
+        
+        // Renderiza a grade de receitas (View Library)
+        function renderLibrary() {
+            const grid = document.getElementById('recipe-grid');
+            grid.innerHTML = '';
+            
+            if(library.length === 0) {
+                document.getElementById('empty-library').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('empty-library').classList.add('hidden');
+
+            library.forEach(r => {
+                const icon = r.icon || 'fa-utensils';
+                grid.innerHTML += `
+                    <div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-lg hover:border-blue-200 transition-all cursor-pointer group relative" onclick="if(!event.target.closest('.del-btn')) openRecipeModal('${r.id}')">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                                <i class="fa-solid ${icon}"></i>
+                            </span>
+                            <button onclick="deleteRecipe('${r.id}', event)" class="del-btn text-slate-300 hover:text-red-500 w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm mb-1 line-clamp-2 leading-tight h-10">${r.name}</h4>
+                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md uppercase font-bold tracking-wide">${r.cat}</span>
+                    </div>
+                `;
             });
         }
 
-        function formatDisplay(q, u) { let val = parseFloat(q); let unit = u.toLowerCase(); if (unit === 'g' && val >= 1000) { return { v: val/1000, u: 'kg' }; } if (unit === 'ml' && val >= 1000) { return { v: val/1000, u: 'l' }; } return { v: val, u: unit }; }
-        function toggleGenInputs() { const type = document.getElementById('gen-type').value; const qtyDiv = document.getElementById('gen-qty-container'); const label = document.getElementById('gen-input-label'); if (type === 'recipe') { qtyDiv.classList.remove('hidden'); label.innerText = 'Tipos de Receita'; document.getElementById('gen-input').placeholder = "Ex: Café da manhã low carb..."; } else { qtyDiv.classList.add('hidden'); label.innerText = 'Seu Perfil'; document.getElementById('gen-input').placeholder = "Ex: Mulher, 35 anos..."; } }
-        function generatePromptText() { const type = document.getElementById('gen-type').value; const inputVal = document.getElementById('gen-input').value; if(!inputVal.trim()) return alert("Preencha as informações."); let final = ""; if (type === 'plan') final = TEMPLATE_PLAN.replace('[PERFIL]', inputVal); else { const qty = document.getElementById('gen-qty').value || 5; final = TEMPLATE_RECIPE.replace('[QTD]', qty).replace('[PERFIL]', inputVal); } document.getElementById('gen-output').value = final; }
-        function copyPromptText() { const txt = document.getElementById('gen-output'); txt.select(); navigator.clipboard.writeText(txt.value); alert("Copiado!"); }
-        function openPromptGen() { document.getElementById('prompt-modal').classList.remove('hidden'); toggleGenInputs(); }
-        function closePromptGen() { document.getElementById('prompt-modal').classList.add('hidden'); }
-        function openImportModal(type) { currentImportType = type; document.getElementById('import-title').innerText = type === 'plan' ? 'Importar Plano' : 'Importar Receitas'; document.getElementById('import-text').value = ''; document.getElementById('import-modal').classList.remove('hidden'); }
-        function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); }
-        function processImport() { let text = document.getElementById('import-text').value.trim(); if(!text) return alert("Cole o JSON."); if (!text.startsWith('{') && !text.startsWith('[')) { const startIdx = text.search(/[\{\[]/); if (startIdx !== -1) { text = text.substring(startIdx); const lastIdx = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']')); if (lastIdx !== -1) text = text.substring(0, lastIdx + 1); } } if (text.startsWith('"library"')) text = '{' + text + '}'; try { const data = JSON.parse(text); if (currentImportType === 'plan') { if (data.library && data.planner) { data.library.forEach(r => { if(!library.find(x=>x.id===r.id)) library.push(r); }); planner = data.planner; themes = data.themes || {}; renderLibrary(); renderPlanner(); loadThemes(); closeImportModal(); alert("Plano importado! Salve na Nuvem."); switchView('planner'); } else { throw new Error("JSON Inválido."); } } else { let list = Array.isArray(data) ? data : (data.library || []); if(!list.length) throw new Error("Sem receitas."); list.forEach(n => { const i = library.findIndex(x => x.id === n.id); if(i >= 0) library[i] = n; else library.push(n); }); renderLibrary(); alert(`Receitas importadas!`); closeImportModal(); } } catch(e) { alert("Erro JSON: " + e.message); } }
-        function switchView(v) { ['library','planner','presets'].forEach(x=>document.getElementById(`view-${x}`).classList.add('hidden')); document.getElementById(`view-${v}`).classList.remove('hidden'); document.querySelectorAll('nav button').forEach(b => { if(b.id.startsWith('nav-')) { b.className = b.id===`nav-${v}` ? "flex items-center w-full px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg shadow-sm mb-1 border border-blue-100" : "flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1"; const i = b.querySelector('i'); i.classList.remove('text-blue-600','text-slate-400'); i.classList.add(b.id===`nav-${v}`?'text-blue-600':'text-slate-400'); } }); const sb = document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) toggleSidebar(); }
-        const tplIngRow = `<div class="grid grid-cols-1 md:grid-cols-12 gap-2 ing-row items-center mb-3 md:mb-2 bg-slate-50 md:bg-transparent p-2 md:p-0 rounded"><div class="md:col-span-5"><input type="text" placeholder="Item" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm i-n font-medium"></div><div class="grid grid-cols-3 gap-2 md:col-span-6 md:grid-cols-6"><div class="col-span-1 md:col-span-2"><input type="number" placeholder="0" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-q"></div><div class="col-span-1 md:col-span-2"><input type="text" placeholder="un" class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm text-center i-u"></div><div class="col-span-1 md:col-span-2"><select class="w-full bg-white md:bg-slate-50 border border-slate-200 rounded-lg px-1 py-2 text-xs i-c"><option value="carnes">Carnes</option><option value="horti">Horti</option><option value="mercearia">Merc.</option><option value="outros">Out.</option></select></div></div><div class="md:col-span-1 text-center"><button onclick="this.closest('.ing-row').remove()" class="text-slate-300 hover:text-red-500 p-2"><i class="fa-solid fa-xmark"></i></button></div></div>`;
-        function renderLibrary() { const g=document.getElementById('recipe-grid'); g.innerHTML=''; if(library.length===0){document.getElementById('empty-library').classList.remove('hidden');return;} document.getElementById('empty-library').classList.add('hidden'); library.forEach(r=>{ const icon = r.icon || 'fa-utensils'; g.innerHTML+=`<div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md cursor-pointer relative group" onclick="if(!event.target.closest('button')) openRecipeModal('${r.id}')"><div class="flex justify-between mb-2"><span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-sm"><i class="fa-solid ${icon}"></i></span><div class="flex gap-1"><button onclick="deleteRecipe('${r.id}', event)" class="text-slate-300 hover:text-red-500 p-1"><i class="fa-solid fa-trash"></i></button></div></div><h4 class="font-bold text-slate-800 text-sm mb-1">${r.name}</h4><span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase font-bold">${r.cat}</span></div>`; }); }
-        function openRecipeModal(id=null) { document.getElementById('recipe-modal').classList.remove('hidden'); document.getElementById('edit-id').value=id||''; document.getElementById('rec-ingredients').innerHTML=''; document.getElementById('rec-steps').innerHTML=''; if(id){ const r=library.find(x=>x.id===id); document.getElementById('rec-name').value=r.name; document.getElementById('rec-cat').value=r.cat; document.getElementById('rec-icon').value=r.icon || 'fa-utensils'; r.ingredients.forEach(i=>{ addRecLine(); const l=document.getElementById('rec-ingredients').lastElementChild; l.querySelector('.i-n').value=i.n; const fmt = formatDisplay(i.q_daily||i.q_week, i.u); l.querySelector('.i-q').value = Number.isInteger(fmt.v) ? fmt.v : fmt.v.toFixed(2); l.querySelector('.i-u').value = fmt.u; l.querySelector('.i-c').value=i.cat||'mercearia'; }); r.steps.forEach(s=>{ addStepLine(); document.getElementById('rec-steps').lastElementChild.querySelector('textarea').value=s; }); } else { document.getElementById('rec-name').value=''; addRecLine(); addStepLine(); } }
+        // Renderiza a tabela do Planejador
+        function renderPlanner() {
+            const tbody = document.getElementById('planner-body');
+            tbody.innerHTML = '';
+            
+            [1, 2, 3, 4].forEach(w => {
+                // Garante estrutura
+                if(!planner[w]) planner[w] = {};
+
+                let rowHtml = `<tr class="hover:bg-slate-50 group transition-colors">
+                    <td class="px-6 py-4 text-sm font-bold text-slate-700 text-center border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-0 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                        Semana ${w}
+                    </td>`;
+                
+                ['cafe', 'almoco', 'lanche', 'jantar'].forEach(slot => {
+                    const recId = planner[w][slot];
+                    const recipe = library.find(x => x.id === recId);
+                    const icon = recipe ? (recipe.icon || 'fa-utensils') : '';
+                    
+                    const cellContent = recipe ? `
+                        <div onclick="openPicker(${w},'${slot}')" class="bg-white border border-blue-200 p-2 rounded-lg shadow-sm cursor-pointer flex items-center gap-3 group/card relative h-14 hover:shadow-md transition-all">
+                            <div class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex flex-shrink-0 items-center justify-center text-xs font-bold">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <span class="font-bold text-xs text-slate-700 truncate w-full pr-4">${recipe.name}</span>
+                            <button onclick="clearSlot(${w},'${slot}',event)" class="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] shadow-sm opacity-0 group-hover/card:opacity-100 transition-opacity hover:bg-red-500 hover:text-white">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    ` : `
+                        <button onclick="openPicker(${w},'${slot}')" class="w-full border-2 border-dashed border-slate-200 rounded-lg h-14 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all group/btn">
+                            <i class="fa-solid fa-plus text-xs mb-0.5 group-hover/btn:scale-110 transition-transform"></i>
+                            <span class="text-[10px] font-bold uppercase tracking-wide">Adicionar</span>
+                        </button>
+                    `;
+                    
+                    rowHtml += `<td class="px-2 py-3 min-w-[160px] align-middle">${cellContent}</td>`;
+                });
+                
+                rowHtml += '</tr>';
+                tbody.innerHTML += rowHtml;
+            });
+        }
+
+        // --- EDITOR DE RECEITAS ---
+        const tplIngRow = `
+            <div class="grid grid-cols-12 gap-2 ing-row items-center mb-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                <div class="col-span-5"><input type="text" placeholder="Item" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm i-n font-medium outline-none focus:border-blue-400"></div>
+                <div class="col-span-2"><input type="number" placeholder="0" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm text-center i-q outline-none focus:border-blue-400"></div>
+                <div class="col-span-2"><input type="text" placeholder="g" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm text-center i-u outline-none focus:border-blue-400"></div>
+                <div class="col-span-2">
+                    <select class="w-full bg-white border border-slate-200 rounded px-1 py-1.5 text-xs i-c outline-none">
+                        <option value="mercearia">Merc.</option>
+                        <option value="carnes">Carnes</option>
+                        <option value="horti">Horti</option>
+                        <option value="outros">Out.</option>
+                    </select>
+                </div>
+                <div class="col-span-1 text-center"><button onclick="this.closest('.ing-row').remove()" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div>
+            </div>`;
+
+        function openRecipeModal(id=null) {
+            document.getElementById('recipe-modal').classList.remove('hidden');
+            document.getElementById('edit-id').value = id || '';
+            document.getElementById('rec-ingredients').innerHTML = '';
+            document.getElementById('rec-steps').innerHTML = '';
+            
+            if(id) {
+                const r = library.find(x => x.id === id);
+                document.getElementById('rec-name').value = r.name;
+                document.getElementById('rec-cat').value = r.cat;
+                document.getElementById('rec-icon').value = r.icon || 'fa-utensils';
+                
+                r.ingredients.forEach(i => {
+                    addRecLine();
+                    const el = document.getElementById('rec-ingredients').lastElementChild;
+                    el.querySelector('.i-n').value = i.n;
+                    
+                    // Formata para exibir (se >1000g vira kg, mas no banco salva g)
+                    let val = i.q_daily || i.q_week || 0;
+                    let u = i.u || 'g';
+                    if(u === 'g' && val >= 1000) { val /= 1000; u = 'kg'; }
+                    if(u === 'ml' && val >= 1000) { val /= 1000; u = 'l'; }
+
+                    el.querySelector('.i-q').value = parseFloat(val.toFixed(2));
+                    el.querySelector('.i-u').value = u;
+                    el.querySelector('.i-c').value = i.cat || 'mercearia';
+                });
+                
+                r.steps.forEach(s => {
+                    addStepLine();
+                    document.getElementById('rec-steps').lastElementChild.querySelector('textarea').value = s;
+                });
+            } else {
+                document.getElementById('rec-name').value = '';
+                addRecLine();
+                addStepLine();
+            }
+        }
+
         function closeModal() { document.getElementById('recipe-modal').classList.add('hidden'); }
         function addRecLine() { document.getElementById('rec-ingredients').insertAdjacentHTML('beforeend', tplIngRow); }
-        function addStepLine() { document.getElementById('rec-steps').insertAdjacentHTML('beforeend', `<div class="flex gap-2 step-row mb-2"><textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm h-16 s-txt" placeholder="Passo..."></textarea><button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div>`); }
-        function saveRecipeToLibrary() { const id=document.getElementById('edit-id').value||'rec_'+Date.now(); const name=document.getElementById('rec-name').value; if(!name)return alert("Nome?"); const ings=[]; document.querySelectorAll('.ing-row').forEach(r=>{ const n=r.querySelector('.i-n').value; if(n) { let q = parseFloat(r.querySelector('.i-q').value)||0; let u = r.querySelector('.i-u').value.toLowerCase(); if(u==='kg') { q*=1000; u='g'; } if(u==='l') { q*=1000; u='ml'; } ings.push({n, q_daily: q, u, cat:r.querySelector('.i-c').value}); } }); const steps=[]; document.querySelectorAll('.s-txt').forEach(t=>{if(t.value)steps.push(t.value);}); const obj={id,name,cat:document.getElementById('rec-cat').value,icon:document.getElementById('rec-icon').value,ingredients:ings,steps}; const i=library.findIndex(x=>x.id===id); if(i>=0) library[i]=obj; else library.push(obj); renderLibrary(); renderPlanner(); }
-        function deleteRecipe(id,e) { e.stopPropagation(); if(confirm("Excluir?")){library=library.filter(x=>x.id!==id); renderLibrary(); renderPlanner();} }
-        function renderPlanner() { const b=document.getElementById('planner-body'); b.innerHTML=''; [1,2,3,4].forEach(w=>{ let h=`<tr class="hover:bg-slate-50 group"><td class="px-6 py-4 text-sm font-bold text-slate-700 text-center border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-0 z-10">Semana ${w}</td>`; ['cafe','almoco','lanche','jantar'].forEach(s=>{ const rid=planner[w][s]; const r=library.find(x=>x.id===rid); const icon = r ? (r.icon || 'fa-utensils') : ''; h+=`<td class="px-2 py-2 min-w-[140px]">${r?`<div onclick="openPicker(${w},'${s}')" class="bg-white border border-blue-200 p-2 md:p-3 rounded-lg shadow-sm cursor-pointer flex items-center gap-2 md:gap-3 group/card relative h-16"><div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex flex-shrink-0 items-center justify-center text-xs font-bold border border-blue-100"><i class="fa-solid ${icon}"></i></div><span class="font-bold text-xs text-slate-700 truncate w-20 md:w-24">${r.name}</span><button onclick="clearSlot(${w},'${s}',event)" class="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] shadow-sm md:opacity-0 group-hover/card:opacity-100"><i class="fa-solid fa-xmark"></i></button></div>`:`<button onclick="openPicker(${w},'${s}')" class="w-full border-2 border-dashed border-slate-200 rounded-lg h-16 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500"><i class="fa-solid fa-plus text-sm mb-1"></i><span class="text-[10px] font-bold uppercase tracking-wide">Add</span></button>`}</td>`; }); b.innerHTML+=h+'</tr>'; }); }
-        function openPicker(w,s) { pickerContext={w,s}; document.getElementById('picker-modal').classList.remove('hidden'); renderPickerList(); document.getElementById('picker-search').focus(); }
+        function addStepLine() { document.getElementById('rec-steps').insertAdjacentHTML('beforeend', `<div class="flex gap-2 step-row mb-2"><textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm h-14 s-txt outline-none focus:border-blue-400 resize-none" placeholder="Descreva o passo..."></textarea><button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-red-500 h-14 w-8"><i class="fa-solid fa-trash"></i></button></div>`); }
+
+        function saveRecipeToLibrary() {
+            const id = document.getElementById('edit-id').value || 'rec_' + Date.now();
+            const name = document.getElementById('rec-name').value;
+            if(!name) return alert("Insira o nome da receita.");
+
+            const ings = [];
+            document.querySelectorAll('.ing-row').forEach(r => {
+                const n = r.querySelector('.i-n').value;
+                if(n) {
+                    let q = parseFloat(r.querySelector('.i-q').value) || 0;
+                    let u = r.querySelector('.i-u').value.toLowerCase();
+                    const cat = r.querySelector('.i-c').value;
+                    
+                    // Normaliza para o banco (Sempre g/ml)
+                    if(u === 'kg') { q *= 1000; u = 'g'; }
+                    if(u === 'l') { q *= 1000; u = 'ml'; }
+                    
+                    ings.push({ n, q_daily: q, u, cat });
+                }
+            });
+
+            const steps = [];
+            document.querySelectorAll('.s-txt').forEach(t => { if(t.value) steps.push(t.value); });
+
+            const obj = {
+                id,
+                name,
+                cat: document.getElementById('rec-cat').value,
+                icon: document.getElementById('rec-icon').value,
+                ingredients: ings,
+                steps
+            };
+
+            const idx = library.findIndex(x => x.id === id);
+            if(idx >= 0) library[idx] = obj;
+            else library.push(obj);
+
+            closeModal();
+            renderLibrary();
+            renderPlanner(); // Atualiza caso tenha editado nome/icone de algo em uso
+        }
+
+        function deleteRecipe(id, e) {
+            e.stopPropagation(); // Evita abrir modal
+            if(confirm("Tem certeza que deseja excluir esta receita?")) {
+                library = library.filter(x => x.id !== id);
+                renderLibrary();
+                renderPlanner();
+            }
+        }
+
+        // --- PICKER (SELETOR) ---
+        function openPicker(w, s) {
+            pickerContext = { w, s };
+            document.getElementById('picker-modal').classList.remove('hidden');
+            document.getElementById('picker-search').value = '';
+            renderPickerList();
+            setTimeout(() => document.getElementById('picker-search').focus(), 100);
+        }
         function closePicker() { document.getElementById('picker-modal').classList.add('hidden'); }
-        function renderPickerList() { const l=document.getElementById('picker-list'); const q=document.getElementById('picker-search').value.toLowerCase(); l.innerHTML=''; library.filter(r=>r.name.toLowerCase().includes(q)).forEach(r=>{ const icon = r.icon || 'fa-utensils'; l.innerHTML+=`<div onclick="assignRecipe('${r.id}')" class="p-3 hover:bg-blue-50 cursor-pointer rounded-lg flex items-center gap-3 border border-transparent hover:border-blue-100 mb-1 group"><div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-xs group-hover:bg-white group-hover:text-blue-500"><i class="fa-solid ${icon}"></i></div><div><p class="text-sm font-bold text-slate-700 group-hover:text-blue-700">${r.name}</p></div></div>`; }); }
-        function assignRecipe(id) { planner[pickerContext.w][pickerContext.s]=id; closePicker(); renderPlanner(); }
-        function clearSlot(w,s,e) { e.stopPropagation(); delete planner[w][s]; renderPlanner(); }
-        function saveThemes() { [1,2,3,4].forEach(w=>themes[w]=document.getElementById(`theme-w${w}`).value); }
-        function loadThemes() { [1,2,3,4].forEach(w=>{if(themes[w])document.getElementById(`theme-w${w}`).value=themes[w];}); }
+        
+        function renderPickerList() {
+            const list = document.getElementById('picker-list');
+            const term = document.getElementById('picker-search').value.toLowerCase();
+            list.innerHTML = '';
+            
+            const filtered = library.filter(r => r.name.toLowerCase().includes(term));
+            
+            if(filtered.length === 0) {
+                list.innerHTML = '<p class="text-center text-xs text-slate-400 py-4">Nenhuma receita encontrada.</p>';
+                return;
+            }
+
+            filtered.forEach(r => {
+                const icon = r.icon || 'fa-utensils';
+                list.innerHTML += `
+                    <div onclick="assignRecipe('${r.id}')" class="p-3 hover:bg-indigo-50 cursor-pointer rounded-lg flex items-center gap-3 border border-transparent hover:border-indigo-100 mb-1 group transition-colors">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-sm group-hover:bg-white group-hover:text-indigo-600 shadow-sm">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-700 group-hover:text-indigo-700">${r.name}</p>
+                            <span class="text-[10px] bg-white border border-slate-200 px-1.5 rounded text-slate-400 uppercase">${r.cat}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function assignRecipe(id) {
+            if(pickerContext) {
+                planner[pickerContext.w][pickerContext.s] = id;
+                renderPlanner();
+                closePicker();
+            }
+        }
+
+        function clearSlot(w, s, e) {
+            e.stopPropagation();
+            delete planner[w][s];
+            renderPlanner();
+        }
+
+        // --- TEMAS ---
+        function saveThemes() {
+            [1, 2, 3, 4].forEach(w => themes[w] = document.getElementById(`theme-w${w}`).value);
+        }
+        function loadThemes() {
+            [1, 2, 3, 4].forEach(w => {
+                const el = document.getElementById(`theme-w${w}`);
+                if(el) el.value = themes[w] || '';
+            });
+        }
     </script>
 </body>
 </html>
