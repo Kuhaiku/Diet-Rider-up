@@ -4,45 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DietCMS | Painel Admin</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        const API_BASE = '/auth'; 
-        const token = localStorage.getItem('token');
-        if (!token) window.location.href = 'index.html';
-
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        }
-    </script>
-
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; height: 100vh; overflow: hidden; }
-        
-        /* Scrollbar Fina */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        
-        /* Loader */
         .loader { border: 3px solid #f1f5f9; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Toast Notification */
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: white; border-left: 4px solid #2563eb; padding: 16px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 12px; min-width: 300px; transform: translateX(100%); transition: transform 0.3s ease-out; }
         .toast.show { transform: translateX(0); }
-        .toast-success { border-color: #22c55e; }
-        .toast-error { border-color: #ef4444; }
-        .toast-info { border-color: #3b82f6; }
-        .toast-warning { border-color: #f59e0b; }
+        .toast-success { border-color: #22c55e; } .toast-error { border-color: #ef4444; } .toast-info { border-color: #3b82f6; } .toast-warning { border-color: #f59e0b; }
     </style>
 </head>
 <body class="flex text-slate-800">
@@ -66,28 +41,36 @@
         <nav class="flex-1 overflow-y-auto p-4 space-y-1">
             <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 mt-2">Navegação</p>
             
-            <button onclick="switchView('presets')" id="nav-presets" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+            <button id="nav-presets" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
                 <i class="fa-solid fa-cloud w-6"></i> Planos Salvos
             </button>
             
-            <button onclick="switchView('planner')" id="nav-planner" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+            <button id="nav-planner" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
                 <i class="fa-solid fa-calendar-days w-6"></i> Editor Atual
             </button>
             
-            <button onclick="switchView('library')" id="nav-library" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
+            <button id="nav-library" class="nav-btn flex items-center w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors mb-1">
                 <i class="fa-solid fa-book-open w-6"></i> Estoque Receitas
             </button>
 
+            <a href="tutorial.html" target="_blank" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors mb-1">
+                <i class="fa-solid fa-graduation-cap w-6"></i> Tutorial
+            </a>
+
+            <a href="app.html" target="_blank" class="flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors mb-1">
+                <i class="fa-solid fa-mobile-screen-button w-6"></i> Area do App
+            </a>
+
             <div class="mt-8 pt-6 border-t border-slate-100">
                 <p class="px-4 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Ferramentas IA</p>
-                <button onclick="openPromptGen()" class="flex items-center w-full px-4 py-3 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-100 transition-colors">
+                <button id="btn-open-gen" class="flex items-center w-full px-4 py-3 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-100 transition-colors">
                     <i class="fa-solid fa-wand-magic-sparkles w-6"></i> Gerador IA
                 </button>
             </div>
         </nav>
 
         <div class="p-4 border-t border-slate-100">
-            <button onclick="logout()" class="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+            <button id="btn-logout" class="flex items-center justify-center w-full px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                 <i class="fa-solid fa-right-from-bracket mr-2"></i> Sair
             </button>
         </div>
@@ -101,7 +84,7 @@
                     <h2 class="text-2xl font-bold text-slate-800">Planos na Nuvem</h2>
                     <p class="text-sm text-slate-500">Seus planejamentos salvos no banco de dados.</p>
                 </div>
-                <button onclick="openImportModal('plan')" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                <button id="btn-import-plan-main" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
                     <i class="fa-solid fa-file-import text-blue-600"></i> Importar JSON
                 </button>
             </header>
@@ -127,7 +110,10 @@
                     <p class="text-sm text-slate-500">Defina as refeições das 4 semanas.</p>
                 </div>
                 <div class="flex gap-3">
-                    <button onclick="saveToCloud()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-green-200 transition-all flex items-center gap-2">
+                    <button id="btn-export-plan" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes text-slate-500"></i> Compartilhar (JSON)
+                    </button>
+                    <button id="btn-save-cloud" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-green-200 transition-all flex items-center gap-2">
                         <i class="fa-solid fa-save"></i> Salvar Alterações
                     </button>
                 </div>
@@ -155,24 +141,8 @@
                     <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-tag text-blue-500"></i> Temas Semanais
                     </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 1</label>
-                            <input type="text" id="theme-w1" placeholder="Ex: Adaptação" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="themes-container">
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 2</label>
-                            <input type="text" id="theme-w2" placeholder="Ex: Foco Proteico" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 3</label>
-                            <input type="text" id="theme-w3" placeholder="Ex: Low Carb" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
-                        </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase">Semana 4</label>
-                            <input type="text" id="theme-w4" placeholder="Ex: Manutenção" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded p-2 text-sm focus:outline-none focus:border-blue-500 transition-colors" onchange="saveThemes()">
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -184,10 +154,13 @@
                     <p class="text-sm text-slate-500">Biblioteca pessoal de refeições.</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openImportModal('recipe')" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                    <button id="btn-export-library" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <i class="fa-solid fa-share-nodes mr-2"></i> Exportar
+                    </button>
+                    <button id="btn-import-recipe" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                         <i class="fa-solid fa-file-import mr-2"></i> Importar Pack
                     </button>
-                    <button onclick="openRecipeModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
+                    <button id="btn-new-recipe" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-lg shadow-blue-200 transition-all flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i> Nova Receita
                     </button>
                 </div>
@@ -210,13 +183,21 @@
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
                 <div>
                     <h3 class="font-bold text-lg text-slate-800" id="import-title">Importar</h3>
-                    <p class="text-xs text-slate-500">Cole o JSON gerado pela IA aqui.</p>
+                    <p class="text-xs text-slate-500">Cole o JSON ou anexe o arquivo.</p>
                 </div>
-                <button onclick="closeImportModal()" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button id="btn-close-import" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <textarea id="import-text" class="flex-1 p-4 bg-slate-50 text-xs font-mono resize-none focus:outline-none focus:bg-white" placeholder="Cole o código JSON..."></textarea>
+            
+            <div class="px-6 pt-4">
+                 <div class="border-2 border-dashed border-slate-200 rounded-lg p-3 text-center bg-slate-50 hover:bg-white hover:border-blue-300 transition-colors relative cursor-pointer">
+                    <input type="file" id="import-file-input" accept=".json" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <p class="text-xs font-bold text-slate-500"><i class="fa-solid fa-paperclip mr-1"></i> Clique para anexar arquivo .json</p>
+                 </div>
+            </div>
+
+            <textarea id="import-text" class="flex-1 p-4 bg-white text-xs font-mono resize-none focus:outline-none" placeholder="Ou cole o código JSON aqui..."></textarea>
             <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-2">
-                <button onclick="processImport()" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-lg">Processar</button>
+                <button id="btn-process-import" class="px-6 py-2 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-lg shadow-lg">Processar</button>
             </div>
         </div>
     </div>
@@ -225,19 +206,19 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden border border-slate-200 max-h-[90vh]">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-indigo-50">
                 <h3 class="font-bold text-lg text-indigo-900 flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerador IA</h3>
-                <button onclick="closePromptGen()" class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                <button id="btn-close-gen" class="text-slate-400 hover:text-indigo-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <div class="p-6 overflow-y-auto space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
-                    <select id="gen-type" onchange="toggleGenInputs()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold outline-none"><option value="plan">Plano Completo</option><option value="recipe">Receitas Avulsas</option></select>
+                    <select id="gen-type" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold outline-none"><option value="plan">Plano Completo</option><option value="recipe">Receitas Avulsas</option></select>
                 </div>
                 <div id="gen-qty-container" class="hidden"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label><input type="number" id="gen-qty" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm font-bold outline-none" value="5"></div>
                 <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1" id="gen-input-label">Perfil</label><textarea id="gen-input" class="w-full h-24 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm resize-none outline-none" placeholder="Detalhes..."></textarea></div>
-                <button onclick="generatePromptText()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg">Gerar</button>
+                <button id="btn-generate-prompt" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg">Gerar Prompt</button>
                 <div class="border-t border-slate-100 pt-4"><label class="block text-xs font-bold text-slate-400 uppercase mb-1">Resultado</label><textarea id="gen-output" class="w-full h-32 bg-slate-900 text-green-400 rounded-lg p-3 text-xs font-mono resize-none" readonly></textarea></div>
             </div>
-            <div class="p-4 border-t border-slate-100 bg-white flex justify-end"><button onclick="copyPromptText()" class="px-6 py-2 text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg shadow-lg flex items-center gap-2"><i class="fa-regular fa-copy"></i> Copiar</button></div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end"><button id="btn-copy-prompt" class="px-6 py-2 text-sm font-bold bg-slate-800 text-white hover:bg-slate-900 rounded-lg shadow-lg flex items-center gap-2"><i class="fa-regular fa-copy"></i> Copiar</button></div>
         </div>
     </div>
 
@@ -245,7 +226,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-full md:h-[90vh] flex flex-col overflow-hidden border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
                 <h3 class="font-bold text-lg text-slate-800">Editor de Receita</h3>
-                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-red-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <button id="btn-close-recipe" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-red-600 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
                 <input type="hidden" id="edit-id">
@@ -256,329 +237,25 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Ingredientes</h4><button onclick="addRecLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded">+ Item</button></div><div id="rec-ingredients" class="space-y-2"></div>
+                        <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Ingredientes</h4><button id="btn-add-ing" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded">+ Item</button></div><div id="rec-ingredients" class="space-y-2"></div>
                     </div>
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Preparo</h4><button onclick="addStepLine()" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded">+ Passo</button></div><div id="rec-steps" class="space-y-3"></div>
+                        <div class="flex justify-between items-center mb-4"><h4 class="font-bold text-slate-700 text-sm">Preparo</h4><button id="btn-add-step" class="text-xs bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded">+ Passo</button></div><div id="rec-steps" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-3"><button onclick="closeModal()" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100">Cancelar</button><button onclick="saveRecipeToLibrary()" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg">Salvar</button></div>
+            <div class="p-4 border-t border-slate-100 bg-white flex justify-end gap-3"><button id="btn-cancel-recipe" class="px-6 py-2.5 rounded-lg text-sm font-bold text-slate-500 hover:bg-slate-100">Cancelar</button><button id="btn-save-recipe" class="bg-blue-600 text-white px-8 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700 shadow-lg">Salvar</button></div>
         </div>
     </div>
 
     <div id="picker-modal" class="fixed inset-0 bg-slate-900/40 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
-            <div class="p-4 bg-slate-800 text-white flex justify-between items-center"><h3 class="font-bold text-sm">Selecionar</h3><button onclick="closePicker()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div>
-            <div class="p-3 bg-slate-50 border-b border-slate-200"><input type="text" id="picker-search" placeholder="Buscar..." class="w-full text-sm pl-4 py-2 rounded-lg border border-slate-300 outline-none focus:border-blue-500" onkeyup="renderPickerList()"></div>
+            <div class="p-4 bg-slate-800 text-white flex justify-between items-center"><h3 class="font-bold text-sm">Selecionar</h3><button id="btn-close-picker" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="p-3 bg-slate-50 border-b border-slate-200"><input type="text" id="picker-search" placeholder="Buscar..." class="w-full text-sm pl-4 py-2 rounded-lg border border-slate-300 outline-none focus:border-blue-500"></div>
             <div id="picker-list" class="max-h-80 overflow-y-auto p-2 bg-white"></div>
         </div>
     </div>
 
-    <script>
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-        if(storedUser && storedUser.name) document.getElementById('user-display').innerText = storedUser.name;
-
-        // Estado e Controle de Mudanças
-        let library = [];
-        let planner = { 1: {}, 2: {}, 3: {}, 4: {} };
-        let themes = {};
-        let lastSavedState = ""; // Hash para verificar alterações
-        let pickerContext = null;
-        let currentImportType = '';
-
-        const TEMPLATE_PLAN = `Atue como um Nutricionista Sênior. Objetivo: Gerar um JSON válido com um plano mensal (4 semanas). SEU PERFIL: [PERFIL] REGRAS RIGOROSAS: 1. "ingredients": Use a Quantidade DIÁRIA ("q_daily") APENAS em 'g' (gramas) ou 'ml' (mililitros). NUNCA use 'kg' ou 'l'. 2. Categorias: "cafe", "almoco", "lanche", "jantar". 3. Mercado: "carnes", "horti", "mercearia", "outros". ESTRUTURA JSON (Responda APENAS ISSO): { "library": [{ "id": "rec_01", "name": "Nome", "cat": "almoco", "icon": "fa-drumstick-bite", "ingredients": [{"n": "Item", "q_daily": 200, "u": "g", "cat": "carnes"}], "steps": ["Passo 1"] }], "planner": { "1": { "cafe": "rec_01" ... } }, "themes": { "1": "Nome..." } }`;
-        const TEMPLATE_RECIPE = `Atue como Nutricionista. Gere um JSON Array com [QTD] receitas do tipo: [PERFIL]. REGRAS: Quantidades DIÁRIAS (q_daily) em 'g'/'ml'. ESTRUTURA: [{ "id": "rec_01", "name": "Nome", "cat": "cafe", "icon": "fa-mug-hot", "ingredients": [{"n": "Item", "q_daily": 200, "u": "g", "cat": "mercearia"}], "steps": ["Passo 1"] }]`;
-
-        window.onload = function() {
-            loadPlansFromDB();
-            switchView('presets');
-            updateLastSavedState();
-        };
-
-        // --- CORE: Estado ---
-        function updateLastSavedState() {
-            lastSavedState = JSON.stringify({ library, planner, themes });
-        }
-
-        function checkChanges() {
-            const current = JSON.stringify({ library, planner, themes });
-            return current !== lastSavedState;
-        }
-
-        // --- UI: Notificações (Toast) ---
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            let icon = 'fa-check-circle';
-            if (type === 'error') icon = 'fa-exclamation-circle';
-            if (type === 'info') icon = 'fa-info-circle';
-            if (type === 'warning') icon = 'fa-triangle-exclamation';
-
-            toast.innerHTML = `<i class="fa-solid ${icon} text-xl ${type === 'success' ? 'text-green-500' : type === 'error' ? 'text-red-500' : type === 'info' ? 'text-blue-500' : 'text-yellow-500'}"></i><span class="font-medium text-sm text-slate-700">${message}</span>`;
-            
-            container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.add('show'));
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // --- NAVEGAÇÃO ---
-        function switchView(viewName) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${viewName}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const isActive = btn.id === `nav-${viewName}`;
-                btn.className = isActive 
-                    ? "nav-btn flex items-center w-full px-4 py-3 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg shadow-sm mb-1 border border-blue-100" 
-                    : "nav-btn flex items-center w-full px-4 py-3 text-sm font-medium text-slate-600 rounded-lg hover:bg-slate-50 transition-colors mb-1";
-                const i = btn.querySelector('i');
-                if(isActive) i.classList.add('text-blue-600'); else i.classList.remove('text-blue-600');
-            });
-        }
-
-        // --- API & DADOS ---
-        async function loadPlansFromDB() {
-            const loading = document.getElementById('loading-plans');
-            const grid = document.getElementById('presets-grid');
-            const empty = document.getElementById('empty-presets');
-            loading.classList.remove('hidden'); grid.innerHTML = ''; empty.classList.add('hidden');
-
-            try {
-                const res = await fetch(`${API_BASE}/get-plans`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if(!res.ok) throw new Error();
-                const plans = await res.json();
-                
-                if (plans.length === 0) empty.classList.remove('hidden');
-                else {
-                    plans.forEach(p => {
-                        const date = new Date(p.updated_at).toLocaleDateString('pt-BR');
-                        const activeBadge = p.is_active ? `<span class="absolute top-4 right-4 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full border border-green-200 shadow-sm flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> ATIVO</span>` : '';
-                        grid.innerHTML += `<div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-xl transition-all relative group cursor-pointer" onclick="loadPlan(${p.id})">${activeBadge}<div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-file-contract"></i></div><h3 class="font-bold text-slate-800 text-lg mb-1 truncate">${p.plan_name}</h3><p class="text-xs text-slate-400 mb-6 font-medium">Atualizado: ${date}</p><button class="w-full py-2.5 border border-slate-200 bg-slate-50 rounded-lg text-sm font-bold text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">Editar Plano</button></div>`;
-                    });
-                }
-            } catch { showToast('Erro ao carregar planos.', 'error'); } finally { loading.classList.add('hidden'); }
-        }
-
-        async function loadPlan(id) {
-            try {
-                const res = await fetch(`${API_BASE}/get-plan/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if(!res.ok) throw new Error();
-                const data = await res.json();
-                
-                library = data.library || [];
-                planner = data.planner || {};
-                themes = data.themes || {};
-                
-                renderLibrary(); renderPlanner(); loadThemes();
-                updateLastSavedState(); // Reseta estado de alteração
-                switchView('planner');
-            } catch { showToast('Erro ao abrir plano.', 'error'); }
-        }
-
-        async function saveToCloud() {
-            if (!checkChanges()) {
-                showToast('Nenhuma alteração detectada.', 'info');
-                return;
-            }
-
-            if(Object.keys(planner[1]).length === 0 && library.length === 0) {
-                showToast('O plano está vazio!', 'warning');
-                return;
-            }
-
-            const name = prompt("Nome do Plano (ex: Hipertrofia Janeiro):");
-            if(!name) return;
-
-            const makeActive = confirm("Ativar este plano no App agora?");
-            const payload = { name, data: { library, planner, themes }, is_active: makeActive };
-            
-            const btn = document.querySelector('button[onclick="saveToCloud()"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...'; btn.disabled = true;
-
-            try {
-                const res = await fetch(`${API_BASE}/save-plan`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    body: JSON.stringify(payload) 
-                });
-                
-                if(res.ok) {
-                    showToast('Plano salvo com sucesso!', 'success');
-                    updateLastSavedState();
-                    loadPlansFromDB();
-                } else { throw new Error(); }
-            } catch { showToast('Erro ao salvar.', 'error'); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
-        }
-
-        // --- IMPORTAÇÃO ---
-        function openImportModal(type) {
-            currentImportType = type;
-            document.getElementById('import-title').innerText = type === 'plan' ? 'Importar Plano' : 'Importar Receitas';
-            document.getElementById('import-text').value = '';
-            document.getElementById('import-modal').classList.remove('hidden');
-        }
-        function closeImportModal() { document.getElementById('import-modal').classList.add('hidden'); }
-
-        function processImport() {
-            let text = document.getElementById('import-text').value.trim();
-            if(!text) return showToast('Cole o JSON.', 'warning');
-            
-            if (!text.startsWith('{') && !text.startsWith('[')) {
-                const start = text.search(/[\{\[]/);
-                if (start !== -1) {
-                    text = text.substring(start);
-                    const end = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']'));
-                    if (end !== -1) text = text.substring(0, end + 1);
-                }
-            }
-            if (text.startsWith('"library"')) text = '{' + text + '}';
-
-            try {
-                const data = JSON.parse(text);
-
-                if (currentImportType === 'plan') {
-                    if (data.library && data.planner) {
-                        data.library.forEach(r => { if(!library.find(x => x.id === r.id)) library.push(r); });
-                        planner = data.planner;
-                        themes = data.themes || {};
-                        renderLibrary(); renderPlanner(); loadThemes();
-                        closeImportModal();
-                        showToast('Plano importado!', 'success');
-                        switchView('planner');
-                    } else { throw new Error(); }
-                } else {
-                    let list = Array.isArray(data) ? data : (data.library || []);
-                    if(!list.length) throw new Error();
-                    list.forEach(n => {
-                        const i = library.findIndex(x => x.id === n.id);
-                        if(i >= 0) library[i] = n; else library.push(n);
-                    });
-                    renderLibrary();
-                    showToast('Receitas importadas!', 'success');
-                    closeImportModal();
-                    switchView('library');
-                }
-            } catch { showToast('JSON Inválido.', 'error'); }
-        }
-
-        // --- IA GENERATOR ---
-        function toggleGenInputs() {
-            const type = document.getElementById('gen-type').value;
-            const qtyDiv = document.getElementById('gen-qty-container');
-            const ph = document.getElementById('gen-input');
-            if (type === 'recipe') {
-                qtyDiv.classList.remove('hidden');
-                ph.placeholder = "Ex: Café da manhã low carb...";
-            } else {
-                qtyDiv.classList.add('hidden');
-                ph.placeholder = "Ex: Mulher, 35 anos, emagrecimento...";
-            }
-        }
-        function generatePromptText() {
-            const type = document.getElementById('gen-type').value;
-            const val = document.getElementById('gen-input').value;
-            if(!val.trim()) return showToast('Preencha o perfil.', 'warning');
-            
-            let final = type === 'plan' ? TEMPLATE_PLAN.replace('[PERFIL]', val) : TEMPLATE_RECIPE.replace('[QTD]', document.getElementById('gen-qty').value || 5).replace('[PERFIL]', val);
-            document.getElementById('gen-output').value = final;
-        }
-        function copyPromptText() {
-            const txt = document.getElementById('gen-output'); txt.select(); navigator.clipboard.writeText(txt.value);
-            showToast('Copiado para área de transferência!', 'success');
-        }
-        function openPromptGen() { document.getElementById('prompt-modal').classList.remove('hidden'); toggleGenInputs(); }
-        function closePromptGen() { document.getElementById('prompt-modal').classList.add('hidden'); }
-
-        // --- RENDERIZAÇÃO ---
-        function renderLibrary() {
-            const grid = document.getElementById('recipe-grid'); grid.innerHTML = '';
-            if(library.length === 0) { document.getElementById('empty-library').classList.remove('hidden'); return; }
-            document.getElementById('empty-library').classList.add('hidden');
-
-            library.forEach(r => {
-                grid.innerHTML += `
-                    <div class="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer relative group" onclick="if(!event.target.closest('.del-btn')) openRecipeModal('${r.id}')">
-                        <div class="flex justify-between items-start mb-3">
-                            <span class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg"><i class="fa-solid ${r.icon || 'fa-utensils'}"></i></span>
-                            <button onclick="deleteRecipe('${r.id}', event)" class="del-btn text-slate-300 hover:text-red-500 w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center transition-colors"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                        <h4 class="font-bold text-slate-800 text-sm mb-1 line-clamp-2 h-10 leading-tight">${r.name}</h4>
-                        <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md uppercase font-bold tracking-wide">${r.cat}</span>
-                    </div>`;
-            });
-        }
-
-        function renderPlanner() {
-            const tbody = document.getElementById('planner-body'); tbody.innerHTML = '';
-            [1, 2, 3, 4].forEach(w => {
-                if(!planner[w]) planner[w] = {};
-                let row = `<tr class="hover:bg-slate-50 group transition-colors"><td class="px-6 py-4 text-sm font-bold text-slate-700 text-center border-r border-slate-200 bg-white group-hover:bg-slate-50 sticky left-0 z-10 shadow-sm">Semana ${w}</td>`;
-                ['cafe', 'almoco', 'lanche', 'jantar'].forEach(slot => {
-                    const r = library.find(x => x.id === planner[w][slot]);
-                    row += `<td class="px-2 py-3 min-w-[160px] align-middle">${r ? 
-                        `<div onclick="openPicker(${w},'${slot}')" class="bg-white border border-blue-200 p-2 rounded-lg shadow-sm cursor-pointer flex items-center gap-3 group/card relative h-14 hover:shadow-md transition-all"><div class="w-8 h-8 rounded-md bg-blue-50 text-blue-600 flex flex-shrink-0 items-center justify-center text-xs font-bold"><i class="fa-solid ${r.icon||'fa-utensils'}"></i></div><span class="font-bold text-xs text-slate-700 truncate w-full pr-4">${r.name}</span><button onclick="clearSlot(${w},'${slot}',event)" class="absolute -top-2 -right-2 w-5 h-5 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-[10px] opacity-0 group-hover/card:opacity-100 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-xmark"></i></button></div>` 
-                        : `<button onclick="openPicker(${w},'${slot}')" class="w-full border-2 border-dashed border-slate-200 rounded-lg h-14 flex flex-col items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50 transition-all group/btn"><i class="fa-solid fa-plus text-xs mb-0.5 group-hover/btn:scale-110 transition-transform"></i><span class="text-[10px] font-bold uppercase tracking-wide">Add</span></button>`}</td>`;
-                });
-                tbody.innerHTML += row + '</tr>';
-            });
-        }
-
-        // --- EDITOR DE RECEITAS & PICKER ---
-        const tplIngRow = `<div class="grid grid-cols-12 gap-2 ing-row items-center mb-2 bg-slate-50 p-2 rounded-lg border border-slate-100"><div class="col-span-5"><input type="text" placeholder="Item" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm i-n font-medium outline-none focus:border-blue-400"></div><div class="col-span-2"><input type="number" placeholder="0" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm text-center i-q outline-none focus:border-blue-400"></div><div class="col-span-2"><input type="text" placeholder="g" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-sm text-center i-u outline-none focus:border-blue-400"></div><div class="col-span-2"><select class="w-full bg-white border border-slate-200 rounded px-1 py-1.5 text-xs i-c outline-none"><option value="mercearia">Merc.</option><option value="carnes">Carnes</option><option value="horti">Horti</option><option value="outros">Out.</option></select></div><div class="col-span-1 text-center"><button onclick="this.closest('.ing-row').remove()" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div></div>`;
-        
-        function openRecipeModal(id=null) {
-            document.getElementById('recipe-modal').classList.remove('hidden');
-            document.getElementById('edit-id').value = id || '';
-            document.getElementById('rec-ingredients').innerHTML = ''; document.getElementById('rec-steps').innerHTML = '';
-            if(id) {
-                const r = library.find(x => x.id === id);
-                document.getElementById('rec-name').value = r.name; document.getElementById('rec-cat').value = r.cat; document.getElementById('rec-icon').value = r.icon||'fa-utensils';
-                r.ingredients.forEach(i => { addRecLine(); const el = document.getElementById('rec-ingredients').lastElementChild; el.querySelector('.i-n').value = i.n; let v=i.q_daily||0, u=i.u||'g'; if(u==='g'&&v>=1000){v/=1000;u='kg'} el.querySelector('.i-q').value = v; el.querySelector('.i-u').value = u; el.querySelector('.i-c').value = i.cat||'mercearia'; });
-                r.steps.forEach(s => { addStepLine(); document.getElementById('rec-steps').lastElementChild.querySelector('textarea').value = s; });
-            } else { document.getElementById('rec-name').value = ''; addRecLine(); addStepLine(); }
-        }
-        function closeModal() { document.getElementById('recipe-modal').classList.add('hidden'); }
-        function addRecLine() { document.getElementById('rec-ingredients').insertAdjacentHTML('beforeend', tplIngRow); }
-        function addStepLine() { document.getElementById('rec-steps').insertAdjacentHTML('beforeend', `<div class="flex gap-2 step-row mb-2"><textarea class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm h-14 s-txt outline-none focus:border-blue-400 resize-none" placeholder="Passo..."></textarea><button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-red-500 h-14 w-8"><i class="fa-solid fa-trash"></i></button></div>`); }
-
-        function saveRecipeToLibrary() {
-            const id = document.getElementById('edit-id').value || 'rec_' + Date.now();
-            const name = document.getElementById('rec-name').value;
-            if(!name) return showToast('Insira o nome.', 'warning');
-            
-            const ings = []; document.querySelectorAll('.ing-row').forEach(r => { const n = r.querySelector('.i-n').value; if(n) { let q = parseFloat(r.querySelector('.i-q').value)||0; let u = r.querySelector('.i-u').value.toLowerCase(); if(u==='kg'){q*=1000;u='g'} ings.push({n, q_daily: q, u, cat: r.querySelector('.i-c').value}); } });
-            const steps = []; document.querySelectorAll('.s-txt').forEach(t => { if(t.value) steps.push(t.value); });
-            
-            const obj = { id, name, cat: document.getElementById('rec-cat').value, icon: document.getElementById('rec-icon').value, ingredients: ings, steps };
-            const idx = library.findIndex(x => x.id === id); if(idx >= 0) library[idx] = obj; else library.push(obj);
-            
-            closeModal(); renderLibrary(); renderPlanner();
-        }
-
-        function deleteRecipe(id, e) { e.stopPropagation(); if(confirm("Excluir receita?")) { library = library.filter(x => x.id !== id); renderLibrary(); renderPlanner(); } }
-
-        function openPicker(w, s) { pickerContext = { w, s }; document.getElementById('picker-modal').classList.remove('hidden'); document.getElementById('picker-search').value = ''; renderPickerList(); setTimeout(() => document.getElementById('picker-search').focus(), 100); }
-        function closePicker() { document.getElementById('picker-modal').classList.add('hidden'); }
-        function renderPickerList() {
-            const list = document.getElementById('picker-list'); const term = document.getElementById('picker-search').value.toLowerCase(); list.innerHTML = '';
-            library.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
-                list.innerHTML += `<div onclick="assignRecipe('${r.id}')" class="p-3 hover:bg-indigo-50 cursor-pointer rounded-lg flex items-center gap-3 border border-transparent hover:border-indigo-100 mb-1 group"><div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-sm group-hover:bg-white group-hover:text-indigo-600"><i class="fa-solid ${r.icon||'fa-utensils'}"></i></div><div><p class="text-sm font-bold text-slate-700 group-hover:text-indigo-700">${r.name}</p><span class="text-[10px] bg-white border border-slate-200 px-1.5 rounded text-slate-400 uppercase">${r.cat}</span></div></div>`;
-            });
-        }
-        function assignRecipe(id) { if(pickerContext) { planner[pickerContext.w][pickerContext.s] = id; renderPlanner(); closePicker(); } }
-        function clearSlot(w, s, e) { e.stopPropagation(); delete planner[w][s]; renderPlanner(); }
-        
-        function saveThemes() { [1, 2, 3, 4].forEach(w => themes[w] = document.getElementById(`theme-w${w}`).value); }
-        function loadThemes() { [1, 2, 3, 4].forEach(w => { const el = document.getElementById(`theme-w${w}`); if(el) el.value = themes[w] || ''; }); }
-    </script>
+    <script src="js/admin.js"></script>
 </body>
 </html>
