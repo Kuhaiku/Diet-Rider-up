@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Usando a versão promise para async/await
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -7,11 +7,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json({ limit: '10mb' })); // Permite JSONs maiores para salvar planos
+app.use(express.json({ limit: '50mb' })); 
 app.use(cors());
 
-// --- CONEXÃO BANCO ---
-const db = mysql.createPool({
+// --- CONEXÃO BANCO (Pool de Conexões) ---
+const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     user: process.env.DB_USER,
@@ -22,21 +22,10 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-// Teste de conexão
-db.getConnection((err, connection) => {
-    if (err) {
-        console.error('❌ ERRO CONEXÃO BANCO:', err.message);
-    } else {
-        console.log('✅ Banco Conectado!');
-        connection.release();
-    }
-});
-
-// --- MIDDLEWARE DE AUTENTICAÇÃO ---
+// Middleware de Autenticação
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-
     if (!token) return res.status(401).json({ msg: "Acesso negado." });
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -46,114 +35,125 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// --- ROTAS DE AUTH ---
-
+// --- ROTAS DE AUTH (Login/Register/Reset) ---
 app.post('/auth/register', async (req, res) => {
     const { name, email, password } = req.body;
-    db.query('SELECT email FROM users WHERE email = ?', [email], async (err, results) => {
-        if (err) return res.status(500).json({ msg: "Erro Banco" });
-        if (results.length > 0) return res.status(400).json({ msg: 'Email já existe.' });
+    try {
+        const [existing] = await pool.query('SELECT email FROM users WHERE email = ?', [email]);
+        if (existing.length > 0) return res.status(400).json({ msg: 'Email já existe.' });
 
         const hashedPassword = await bcrypt.hash(password, 8);
-        db.query('INSERT INTO users SET ?', { name, email, password: hashedPassword }, (err) => {
-            if (err) return res.status(500).json({ msg: "Erro ao salvar" });
-            res.status(201).json({ msg: 'Sucesso!' });
-        });
-    });
+        await pool.query('INSERT INTO users SET ?', { name, email, password: hashedPassword });
+        res.status(201).json({ msg: 'Sucesso!' });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.post('/auth/login', (req, res) => {
+app.post('/auth/login', async (req, res) => {
     const { email, password } = req.body;
-    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-        if (err || results.length === 0 || !(await bcrypt.compare(password, results[0].password))) {
+    try {
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (users.length === 0 || !(await bcrypt.compare(password, users[0].password))) {
             return res.status(401).json({ msg: 'Login inválido.' });
         }
-        const token = jwt.sign({ id: results[0].id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-        res.json({ msg: 'Logado', token, user: { name: results[0].name, email } });
-    });
+        const token = jwt.sign({ id: users[0].id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        res.json({ msg: 'Logado', token, user: { name: users[0].name, email } });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Esqueci a Senha (MANTIDO)
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: true, 
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-});
+// --- ROTAS DE DADOS (CORE DO SISTEMA) ---
 
-app.post('/auth/forgot-password', (req, res) => {
-    const { email } = req.body;
-    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-        if (err || results.length === 0) return res.status(404).json({ msg: "Email não encontrado" });
-        const token = Math.floor(100000 + Math.random() * 900000).toString();
-        const expireDate = new Date(Date.now() + 28800000); 
-        db.query('UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?', [token, expireDate, email], (err) => {
-            if (err) return res.status(500).json({ msg: "Erro ao gerar token" });
-            transporter.sendMail({
-                from: process.env.EMAIL_USER, to: email,
-                subject: 'Recuperação - DietCMS', text: `Código: ${token}`
-            });
-            res.json({ msg: "Código enviado!" });
-        });
-    });
-});
-
-app.post('/auth/reset-password', async (req, res) => {
-    const { email, code, newPassword } = req.body;
-    db.query('SELECT * FROM users WHERE email = ? AND reset_token = ?', [email, code], async (err, results) => {
-        if (err || results.length === 0) return res.status(400).json({ msg: "Código inválido." });
-        const user = results[0];
-        if (new Date() > new Date(user.reset_expires)) return res.status(400).json({ msg: "Expirado." });
-        const hashed = await bcrypt.hash(newPassword, 8);
-        db.query('UPDATE users SET password = ?, reset_token = NULL WHERE id = ?', [hashed, user.id], (err) => {
-            if(err) return res.status(500).json({ msg: "Erro" });
-            res.json({ msg: "Senha alterada!" });
-        });
-    });
-});
-
-// --- ROTAS DE DADOS (DATABASE) ---
-
-// 1. Salvar Plano
-app.post('/auth/save-plan', authenticateToken, (req, res) => {
-    const { name, data, is_active } = req.body;
+// 1. SALVAR PLANO (Admin)
+app.post('/auth/save-plan', authenticateToken, async (req, res) => {
+    const { name, data, is_active } = req.body; // data contém { library, planner, themes }
     const userId = req.user.id;
-    const jsonData = JSON.stringify(data);
+    
+    if (!data || !data.library) return res.status(400).json({ error: "Dados incompletos" });
 
-    if (is_active) {
-        db.query('UPDATE diet_plans SET is_active = 0 WHERE user_id = ?', [userId]);
-    }
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
 
-    db.query('SELECT id FROM diet_plans WHERE user_id = ? AND plan_name = ?', [userId, name], (err, results) => {
-        if (results.length > 0) {
-            db.query('UPDATE diet_plans SET plan_data = ?, is_active = ? WHERE id = ?', [jsonData, is_active, results[0].id], (err) => {
-                if(err) return res.status(500).json({error: err});
-                res.json({ msg: "Plano atualizado!" });
-            });
-        } else {
-            db.query('INSERT INTO diet_plans (user_id, plan_name, plan_data, is_active) VALUES (?, ?, ?, ?)', 
-            [userId, name, jsonData, is_active], (err) => {
-                if(err) return res.status(500).json({error: err});
-                res.json({ msg: "Plano salvo!" });
-            });
+        // A. Se for para ativar, desativa os anteriores
+        if (is_active) {
+            await connection.query('UPDATE plans SET is_active = 0 WHERE user_id = ?', [userId]);
         }
-    });
+
+        // B. Salva/Atualiza o Plano na tabela 'plans'
+        // Verifica se já existe um plano com esse nome para atualizar, ou cria novo
+        const [existing] = await connection.query('SELECT id FROM plans WHERE user_id = ? AND plan_name = ?', [userId, name]);
+        
+        const jsonString = JSON.stringify(data);
+
+        if (existing.length > 0) {
+            await connection.query('UPDATE plans SET plan_data = ?, is_active = ? WHERE id = ?', 
+                [jsonString, is_active, existing[0].id]);
+        } else {
+            await connection.query('INSERT INTO plans (user_id, plan_name, plan_data, is_active) VALUES (?, ?, ?, ?)', 
+                [userId, name, jsonString, is_active]);
+        }
+
+        // C. Salva as Receitas individualmente no Estoque ('recipes')
+        // Isso permite reutilizar receitas em outros planos
+        for (const rec of data.library) {
+            const sqlRecipe = `
+                INSERT INTO recipes (recipe_id, user_id, name, category, full_data)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                name = VALUES(name), category = VALUES(category), full_data = VALUES(full_data)
+            `;
+            await connection.query(sqlRecipe, [
+                rec.id, userId, rec.name, rec.cat, JSON.stringify(rec)
+            ]);
+        }
+
+        await connection.commit();
+        res.json({ success: true, msg: "Plano e Receitas salvos com sucesso!" });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error(error);
+        res.status(500).json({ error: "Erro ao salvar no banco." });
+    } finally {
+        connection.release();
+    }
 });
 
-// 2. Listar Planos
-app.get('/auth/get-plans', authenticateToken, (req, res) => {
-    db.query('SELECT id, plan_name, is_active, updated_at FROM diet_plans WHERE user_id = ? ORDER BY updated_at DESC', [req.user.id], (err, results) => {
-        if(err) return res.status(500).json({error: err});
-        res.json(results);
-    });
+// 2. LISTAR PLANOS SALVOS (Admin)
+app.get('/auth/get-plans', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT id, plan_name, is_active, updated_at FROM plans WHERE user_id = ? ORDER BY updated_at DESC', [req.user.id]);
+        res.json(rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. Carregar Plano Específico
-app.get('/auth/get-plan/:id', authenticateToken, (req, res) => {
-    db.query('SELECT plan_data FROM diet_plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id], (err, results) => {
-        if(err || results.length === 0) return res.status(404).json({msg: "Não encontrado"});
-        res.json(results[0].plan_data);
-    });
+// 3. CARREGAR PLANO PARA EDIÇÃO (Admin)
+app.get('/auth/get-plan/:id', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT plan_data FROM plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+        if (rows.length === 0) return res.status(404).json({ msg: "Não encontrado" });
+        
+        let plan = rows[0].plan_data;
+        if (typeof plan === 'string') plan = JSON.parse(plan);
+        res.json(plan);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.listen(3000, () => console.log('🚀 Backend rodando na porta 3000'));
+// 4. CARREGAR PLANO ATIVO (App Mobile)
+app.get('/auth/get-active-plan', authenticateToken, async (req, res) => {
+    try {
+        // Pega o plano marcado como is_active = 1
+        const [rows] = await pool.query('SELECT plan_data FROM plans WHERE user_id = ? AND is_active = 1 ORDER BY updated_at DESC LIMIT 1', [req.user.id]);
+        
+        if (rows.length > 0) {
+            let plan = rows[0].plan_data;
+            if (typeof plan === 'string') plan = JSON.parse(plan);
+            res.json(plan);
+        } else {
+            // Retorna vazio mas com estrutura válida para não quebrar o App
+            res.status(404).json({ msg: "Nenhum plano ativo." });
+        }
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`🔥 Servidor rodando na porta ${PORT}`));
